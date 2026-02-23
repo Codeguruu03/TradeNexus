@@ -1,0 +1,13 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\TradeNexus.Web",
+    "\\TradeNexus.Web\\Controllers",
+    "\\TradeNexus.Web\\Data",
+    "\\TradeNexus.Web\\Models",
+    "\\TradeNexus.Web\\PythonEngine",
+    "\\TradeNexus.Web\\Services"
+  ],
+  "SelectedNode": "\\README.md",
+  "PreviewInSolutionExplorer": false
+}
