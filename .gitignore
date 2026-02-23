@@ -1,0 +1,43 @@
+## Ignore build outputs
+bin/
+obj/
+publish/
+*.db
+*.db-shm
+*.db-wal
+
+## Visual Studio user-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+## Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+## NuGet Packages
+*.nupkg
+*.snupkg
+**/packages/*
+
+## Visual Studio cache/options
+.vs/
+.vscode/
+
+## Rider
+.idea/
+
+## OS generated files
+.DS_Store
+Thumbs.db
