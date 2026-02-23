@@ -1,0 +1,37 @@
+@model IEnumerable<TradeNexus.Web.Models.Client>
+@{
+    ViewData["Title"] = "Client List";
+}
+
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Master Brokerage - Sub-Broker Clients</h1>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Client Name</th>
+                    <th>Sub-Broker</th>
+                    <th>Trading Limit</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model) {
+                    <tr>
+                        <td>@item.ClientName</td>
+                        <td>@item.SubBroker.BrokerName</td>
+                        <td>@item.TradingLimit.ToString("C")</td>
+                        <td>
+                            <a asp-action="CalculateRisk" asp-route-clientId="@item.Id" class="btn btn-primary btn-sm">
+                                Calculate Risk
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
