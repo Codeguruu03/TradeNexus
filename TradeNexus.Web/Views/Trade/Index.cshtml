@@ -106,29 +106,57 @@
             }
             else
             {
+                // Sort clients by risk level (highest risk first)
+                var sortedClients = clients.OrderByDescending(c => (c.Quantity * c.Price) / c.MarginAvailable * 100).ToList();
+                
                 <div class="row g-4" id="clientCardsContainer">
-                    @foreach (var item in clients)
+                    @foreach (var item in sortedClients)
                     {
                         var riskLevel = item.MarginAvailable > 0 ? "Low" : "High";
                         var riskColor = riskLevel == "Low" ? "success" : "danger";
                         var exposurePercent = ((item.Quantity * item.Price) / item.MarginAvailable * 100);
                         if (exposurePercent > 100) exposurePercent = 100;
+                        
+                        // Determine risk category
+                        var riskCategory = exposurePercent > 80 ? "HIGH RISK" : exposurePercent > 50 ? "WATCHLIST" : "SAFE";
+                        var riskBadgeColor = exposurePercent > 80 ? "#dc3545" : exposurePercent > 50 ? "#ff9800" : "#28a745";
+                        var riskBadgeBg = exposurePercent > 80 ? "#f8d7da" : exposurePercent > 50 ? "#fff3cd" : "#d4edda";
+                        var cardBorderColor = exposurePercent > 80 ? "#dc3545" : exposurePercent > 50 ? "#ff9800" : "#28a745";
 
                         <div class="col-xl-4 col-lg-6 col-md-6 mb-4 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
-                            <div class="card h-100" style="border-radius: 18px; border: 2px solid #e8e8e8; box-shadow: 0 3px 15px rgba(0,0,0,0.05); transition: all 0.3s; background: white;"
-                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'; this.style.borderColor='#667eea'"
-                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 15px rgba(0,0,0,0.05)'; this.style.borderColor='#e8e8e8'">
+                            <div class="card h-100" style="border-radius: 18px; border: 2px solid #e8e8e8; border-left: 5px solid @cardBorderColor; box-shadow: 0 3px 15px rgba(0,0,0,0.05); transition: all 0.3s; background: white;"
+                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'"
+                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 15px rgba(0,0,0,0.05)'">
                                 <div class="card-body p-0">
-                                    <!-- Clean Header with Risk Badge -->
+                                    <!-- Clean Header with Risk Badges -->
                                     <div style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0; padding: 20px; border-radius: 16px 16px 0 0; position: relative;">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div style="flex: 1;">
                                                 <h5 class="mb-1" style="font-weight: 700; color: #2c3e50; font-size: 1.15rem;">@item.ClientName</h5>
                                                 <small style="color: #666; font-weight: 600;">Code: <strong style="color: #667eea;">@item.ClientCode</strong></small>
                                             </div>
-                                            <span class="badge" style="padding: 8px 15px; font-size: 0.75rem; font-weight: 600; @(riskLevel == "Low" ? "background: #d4edda; color: #155724;" : "background: #f8d7da; color: #721c24;")">
-                                                <i class="fas fa-shield-alt"></i> @riskLevel Risk
-                                            </span>
+                                            <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-end;">
+                                                <!-- Risk Category Badge -->
+                                                <span class="badge" style="padding: 6px 12px; font-size: 0.65rem; font-weight: 700; background: @riskBadgeBg; color: @riskBadgeColor; border: 1.5px solid @riskBadgeColor; letter-spacing: 0.5px;">
+                                                    @if (riskCategory == "HIGH RISK")
+                                                    {
+                                                        <i class="fas fa-exclamation-triangle"></i>
+                                                    }
+                                                    else if (riskCategory == "WATCHLIST")
+                                                    {
+                                                        <i class="fas fa-exclamation-circle"></i>
+                                                    }
+                                                    else
+                                                    {
+                                                        <i class="fas fa-check-circle"></i>
+                                                    }
+                                                    @riskCategory
+                                                </span>
+                                                <!-- Utilization Badge -->
+                                                <span style="padding: 4px 10px; font-size: 0.7rem; font-weight: 700; background: @riskBadgeColor; color: white; border-radius: 12px; letter-spacing: 0.3px;">
+                                                    @Math.Round(exposurePercent, 1)% USED
+                                                </span>
+                                            </div>
                                         </div>
                                     </div>
 
