@@ -2,9 +2,12 @@
 @using TradeNexus.Web.Helpers
 @{
     ViewData["Title"] = "Trade Dashboard";
-    var totalClients = Model?.Count() ?? 0;
-    var totalMargin = Model?.Sum(m => m.MarginAvailable) ?? 0;
+    var clients = Model?.GroupBy(m => m.ClientId).Select(g => g.First()).ToList() ?? new List<TradeNexus.Web.Models.Trade>();
+    var totalClients = clients.Count();
+    var totalMargin = clients.Sum(c => c.MarginAvailable);
     var avgMargin = totalClients > 0 ? totalMargin / totalClients : 0;
+    var totalExposure = Model?.Sum(m => m.Quantity * m.Price) ?? 0;
+    var subBrokers = clients.Select(c => c.SubBrokerId).Distinct().Count();
 }
 
 <!-- Page Header -->
@@ -12,61 +15,74 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1><i class="fas fa-tachometer-alt"></i> Trading Dashboard</h1>
-            <p class="mb-0">Multi-Tenant Brokerage Management System</p>
+            <p class="mb-0">Real-time Portfolio & Risk Management System</p>
         </div>
         <div>
-            <button class="btn btn-light" onclick="location.reload()">
+            <button class="btn btn-light" onclick="location.reload()" style="position: relative; z-index: 2;">
                 <i class="fas fa-sync-alt"></i> Refresh
             </button>
         </div>
     </div>
 </div>
 
-<!-- Statistics Cards -->
+<!-- KPI Dashboard Cards -->
 <div class="row mb-4">
-    <div class="col-md-3">
+    <div class="col-lg-3 col-md-6">
         <div class="stat-card primary position-relative">
             <i class="fas fa-users icon"></i>
             <h3>@totalClients</h3>
             <p>Total Clients</p>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-lg-3 col-md-6">
         <div class="stat-card success position-relative">
-            <i class="fas fa-dollar-sign icon"></i>
+            <i class="fas fa-wallet icon"></i>
             <h3>@totalMargin.ToIndianCurrency()</h3>
             <p>Total Margin</p>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-lg-3 col-md-6">
         <div class="stat-card warning position-relative">
-            <i class="fas fa-chart-bar icon"></i>
+            <i class="fas fa-chart-line icon"></i>
             <h3>@avgMargin.ToIndianCurrency()</h3>
             <p>Avg Margin/Client</p>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-lg-3 col-md-6">
         <div class="stat-card danger position-relative">
             <i class="fas fa-building icon"></i>
-            <h3>@(Model?.Select(m => m.SubBrokerId).Distinct().Count() ?? 0)</h3>
+            <h3>@subBrokers</h3>
             <p>Sub-Brokers</p>
         </div>
     </div>
 </div>
 
-<!-- Main Content -->
+<!-- Client Portfolio Section -->
 <div class="row">
     <div class="col-12">
         <div class="data-table-wrapper">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h4 class="mb-0"><i class="fas fa-th-list"></i> Client Portfolio</h4>
+                <div>
+                    <h4 class="mb-0"><i class="fas fa-th-list"></i> Client Portfolio</h4>
+                    <small class="text-muted">Manage and monitor all client accounts</small>
+                </div>
                 <div class="btn-group">
-                    <button class="btn btn-sm btn-outline-primary" onclick="exportToExcel()">
+                    <button class="btn btn-sm btn-primary" onclick="exportToExcel()">
                         <i class="fas fa-file-excel"></i> Export
                     </button>
-                    <button class="btn btn-sm btn-outline-primary" onclick="printTable()">
+                    <button class="btn btn-sm btn-info" onclick="printTable()">
                         <i class="fas fa-print"></i> Print
                     </button>
+                </div>
+            </div>
+
+            <!-- Search & Filter -->
+            <div class="mb-4">
+                <div class="input-group">
+                    <span class="input-group-text" style="background: #f0f0f0; border: none;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control" id="clientSearch" placeholder="Search by client name, code, or location..." style="border-left: none;">
                 </div>
             </div>
 
@@ -79,53 +95,85 @@
             }
             else
             {
-                <table class="table table-hover data-table">
-                    <thead>
-                        <tr>
-                            <th><i class="fas fa-user"></i> Client Code</th>
-                            <th><i class="fas fa-id-card"></i> Client Name</th>
-                            <th><i class="fas fa-handshake"></i> Sub-Broker</th>
-                            <th><i class="fas fa-map-marker-alt"></i> Location</th>
-                            <th><i class="fas fa-wallet"></i> Margin Available</th>
-                            <th><i class="fas fa-cogs"></i> Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td><strong class="text-primary">@item.ClientCode</strong></td>
-                                <td>
-                                    <div>@item.ClientName</div>
-                                    <small class="text-muted">PAN: @item.PAN</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-secondary">@item.SubBrokerCode</span>
-                                    <br><small>@item.SubBrokerName</small>
-                                </td>
-                                <td>
-                                    <i class="fas fa-map-pin text-danger"></i> @item.City
-                                    <br><small class="text-muted">@item.State</small>
-                                </td>
-                                <td>
-                                    <strong class="text-success">@item.MarginAvailable.ToIndianCurrency()</strong>
-                                </td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <button type="button" class="btn btn-sm btn-info" 
-                                                onclick="viewTrades(@item.ClientId, '@item.ClientName', '@item.ClientCode')">
-                                            <i class="fas fa-eye"></i> View Trades
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-warning" 
-                                                onclick="analyzeRisk(@item.ClientId, '@item.ClientName')">
-                                            <i class="fas fa-chart-pie"></i> Risk Analysis
-                                        </button>
+                <div class="row" id="clientCardsContainer">
+                    @foreach (var item in clients)
+                    {
+                        var riskLevel = item.MarginAvailable > 0 ? "Low" : "High";
+                        var riskColor = riskLevel == "Low" ? "success" : "danger";
+                        var exposurePercent = ((item.Quantity * item.Price) / item.MarginAvailable * 100);
+                        if (exposurePercent > 100) exposurePercent = 100;
+
+                        <div class="col-lg-6 mb-4 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
+                            <div class="card h-100" style="border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s;">
+                                <div class="card-body p-0">
+                                    <!-- Header with Risk Badge -->
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px 20px 0 0; position: relative;">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h5 class="mb-1" style="font-weight: 800;">@item.ClientName</h5>
+                                                <small>Code: <strong>@item.ClientCode</strong></small>
+                                            </div>
+                                            <span class="badge bg-@riskColor" style="padding: 8px 15px; font-size: 0.8rem;">
+                                                <i class="fas fa-shield-alt"></i> @riskLevel Risk
+                                            </span>
+                                        </div>
                                     </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
+
+                                    <!-- Content -->
+                                    <div style="padding: 20px;">
+                                        <!-- Client Details Grid -->
+                                        <div class="row mb-4">
+                                            <div class="col-6 mb-3">
+                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">PAN</small>
+                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">@item.PAN</strong>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Location</small>
+                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">
+                                                    <i class="fas fa-map-marker-alt" style="color: #eb3349;"></i> @item.City, @item.State
+                                                </strong>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Sub-Broker</small>
+                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">@item.SubBrokerCode</strong>
+                                                <small style="color: #666;">@item.SubBrokerName</small>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Margin Available</small>
+                                                <strong class="d-block" style="font-size: 1.2rem; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                                                    @item.MarginAvailable.ToIndianCurrency()
+                                                </strong>
+                                            </div>
+                                        </div>
+
+                                        <!-- Margin Utilization Progress Bar -->
+                                        <div class="mb-4">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <small class="text-muted" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Margin Utilization</small>
+                                                <small style="font-weight: 700; color: #667eea;">@Math.Round(exposurePercent, 1)%</small>
+                                            </div>
+                                            <div class="progress" style="height: 8px; border-radius: 10px; background: #e0e0e0;">
+                                                <div class="progress-bar" style="width: @exposurePercent%; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%); border-radius: 10px;"></div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons -->
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary flex-grow-1" style="border-radius: 12px; font-weight: 600; padding: 12px; font-size: 0.9rem;"
+                                                    onclick="viewTrades(@item.ClientId, '@item.ClientName', '@item.ClientCode')">
+                                                <i class="fas fa-chart-line"></i> View Trades
+                                            </button>
+                                            <button type="button" class="btn btn-warning flex-grow-1" style="border-radius: 12px; font-weight: 600; padding: 12px; font-size: 0.9rem; color: white;"
+                                                    onclick="analyzeRisk(@item.ClientId, '@item.ClientName')">
+                                                <i class="fas fa-exclamation-triangle"></i> Risk Analysis
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
             }
         </div>
     </div>
@@ -177,6 +225,24 @@
 
 @section Scripts {
     <script>
+        // Search Functionality
+        $('#clientSearch').on('keyup', function() {
+            let searchTerm = $(this).val().toLowerCase();
+            
+            if (searchTerm === '') {
+                $('.client-card').show();
+            } else {
+                $('.client-card').each(function() {
+                    let clientData = $(this).data('client').toLowerCase();
+                    if (clientData.includes(searchTerm)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            }
+        });
+
         function viewTrades(clientId, clientName, clientCode) {
             $('#modalClientName').text(clientName + ' (' + clientCode + ')');
             $('#tradesModal').modal('show');
@@ -190,6 +256,9 @@
 
             $.get('/Trade/ClientTrades?clientId=' + clientId, function(data) {
                 $('#tradesContent').html(data);
+                if (typeof initCharts === 'function') {
+                    initCharts();
+                }
             }).fail(function() {
                 $('#tradesContent').html(`
                     <div class="alert alert-danger">

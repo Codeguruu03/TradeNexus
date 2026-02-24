@@ -16,177 +16,178 @@
 
 @if (errorMessage != null)
 {
-    <div class="alert alert-danger">
-        <i class="fas fa-exclamation-circle"></i> @errorMessage
+    <div style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); color: white; padding: 20px; border-radius: 15px; display: flex; align-items: center; gap: 15px;">
+        <i class="fas fa-exclamation-circle" style="font-size: 1.5rem; flex-shrink: 0;"></i>
+        <div>@errorMessage</div>
     </div>
 }
 else if (result != null)
 {
     var riskLevel = result.riskLevel?.ToString() ?? "Unknown";
     var riskColor = riskLevel == "High" ? "danger" : (riskLevel == "Medium" ? "warning" : "success");
+    var riskGradient = riskLevel == "High" ? "linear-gradient(135deg, #eb3349 0%, #f45c43 100%)" : (riskLevel == "Medium" ? "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" : "linear-gradient(135deg, #11998e 0%, #38ef7d 100%)");
     var totalExposure = result.totalExposure?.ToString() ?? "0";
     var requiredMargin = result.requiredMargin?.ToString() ?? "0";
     var limitBreach = result.limitBreach == true;
 
     <!-- Risk Summary Cards -->
     <div class="row mb-4">
-        <div class="col-md-4">
-            <div class="card border-@riskColor">
-                <div class="card-body text-center">
-                    <i class="fas fa-shield-alt fa-3x text-@riskColor mb-3"></i>
-                    <h2 class="text-@riskColor">@riskLevel</h2>
-                    <p class="mb-0 text-muted">Risk Level</p>
-                </div>
+        <div class="col-lg-4">
+            <div style="background: @riskGradient; color: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                <i class="fas fa-shield-alt fa-3x mb-3" style="opacity: 0.9;"></i>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin: 15px 0;">@riskLevel</h2>
+                <p style="font-size: 1.1rem; font-weight: 600; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px;">RISK LEVEL</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
-                    <h2 class="text-primary">@totalExposure</h2>
-                    <p class="mb-0 text-muted">Total Exposure</p>
-                </div>
+        <div class="col-lg-4">
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                <i class="fas fa-chart-line fa-3x mb-3" style="opacity: 0.9;"></i>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin: 15px 0;">@(decimal.Parse(totalExposure).ToIndianCurrency())</h2>
+                <p style="font-size: 1.1rem; font-weight: 600; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px;">Total Exposure</p>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <i class="fas fa-wallet fa-3x text-info mb-3"></i>
-                    <h2 class="text-info">@requiredMargin</h2>
-                    <p class="mb-0 text-muted">Required Margin (20%)</p>
-                </div>
+        <div class="col-lg-4">
+            <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                <i class="fas fa-wallet fa-3x mb-3" style="opacity: 0.9;"></i>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin: 15px 0;">@(decimal.Parse(requiredMargin).ToIndianCurrency())</h2>
+                <p style="font-size: 1.1rem; font-weight: 600; opacity: 0.95; text-transform: uppercase; letter-spacing: 1px;">Required Margin</p>
             </div>
         </div>
     </div>
 
-    <!-- Risk Meter -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">
-                <i class="fas fa-tachometer-alt"></i> Risk Meter
-            </h5>
-            <div class="progress" style="height: 40px;">
-                @if (riskLevel == "Low")
-                {
-                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 25%">
-                        Low Risk (25%)
-                    </div>
-                }
-                else if (riskLevel == "Medium")
-                {
-                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 60%">
-                        Medium Risk (60%)
-                    </div>
-                }
-                else
-                {
-                    <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 90%">
-                        High Risk (90%)
-                    </div>
-                }
-            </div>
+    <!-- Risk Meter Progress Bar -->
+    <div style="background: white; padding: 30px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 20px;">
+        <h5 style="font-weight: 700; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem;">
+            <i class="fas fa-tachometer-alt" style="color: #667eea;"></i> Risk Meter
+        </h5>
+        <div style="background: #f0f0f0; height: 12px; border-radius: 10px; overflow: hidden; margin-bottom: 10px;">
+            @if (riskLevel == "Low")
+            {
+                <div style="width: 25%; height: 100%; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);"></div>
+            }
+            else if (riskLevel == "Medium")
+            {
+                <div style="width: 60%; height: 100%; background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);"></div>
+            }
+            else
+            {
+                <div style="width: 90%; height: 100%; background: linear-gradient(90deg, #eb3349 0%, #f45c43 100%);"></div>
+            }
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem; color: #666; font-weight: 600;">
+            <span>Low (0%)</span>
+            <span>Medium (50%)</span>
+            <span>High (100%)</span>
         </div>
     </div>
 
     <!-- Limit Breach Alert -->
     @if (limitBreach)
     {
-        <div class="alert alert-danger d-flex align-items-center" role="alert">
-            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
-            <div>
-                <h5 class="alert-heading">Margin Limit Breach Detected!</h5>
-                <p class="mb-0">The client's exposure exceeds the available margin. Immediate action required.</p>
-            </div>
+        <div style="background: linear-gradient(135deg, rgba(235, 51, 73, 0.1) 0%, rgba(244, 92, 67, 0.1) 100%); border-left: 5px solid #eb3349; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <h5 style="color: #d63447; margin-bottom: 10px; font-weight: 700;">
+                <i class="fas fa-exclamation-triangle"></i> ⚠️ Margin Limit Breach Detected!
+            </h5>
+            <p style="color: #666; margin-bottom: 0; font-weight: 500;">
+                The client's exposure exceeds the available margin. Immediate action is recommended to manage the risk exposure.
+            </p>
         </div>
     }
     else
     {
-        <div class="alert alert-success d-flex align-items-center" role="alert">
-            <i class="fas fa-check-circle fa-2x me-3"></i>
-            <div>
-                <h5 class="alert-heading">Within Margin Limits</h5>
-                <p class="mb-0">The client's trading activity is within acceptable margin limits.</p>
-            </div>
+        <div style="background: linear-gradient(135deg, rgba(17, 153, 142, 0.1) 0%, rgba(56, 239, 125, 0.1) 100%); border-left: 5px solid #11998e; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+            <h5 style="color: #11998e; margin-bottom: 10px; font-weight: 700;">
+                <i class="fas fa-check-circle"></i> ✓ Within Margin Limits
+            </h5>
+            <p style="color: #666; margin-bottom: 0; font-weight: 500;">
+                The client's trading activity is within acceptable margin limits.
+            </p>
         </div>
     }
 
-    <!-- Client Info -->
-    <div class="card mb-4">
-        <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="fas fa-user"></i> Client Information</h5>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Client Name:</strong> @ViewBag.ClientName</p>
-                    <p><strong>Client ID:</strong> @ViewBag.ClientId</p>
-                </div>
-                <div class="col-md-6">
-                    <p><strong>Total Trades:</strong> @ViewBag.TradeCount</p>
-                    <p><strong>Total Exposure:</strong> @((decimal)ViewBag.TotalExposure).ToIndianCurrency()</p>
-                </div>
+    <!-- Client Info Card -->
+    <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 20px;">
+        <h5 style="font-weight: 700; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem;">
+            <i class="fas fa-user" style="color: #667eea;"></i> Client Information
+        </h5>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <small style="font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px;">Client Name</small>
+                <p style="font-size: 1.1rem; color: #333; font-weight: 700; margin-top: 5px;">@ViewBag.ClientName</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <small style="font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px;">Client ID</small>
+                <p style="font-size: 1.1rem; color: #667eea; font-weight: 700; margin-top: 5px;">@ViewBag.ClientId</p>
+            </div>
+            <div class="col-md-6">
+                <small style="font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px;">Total Trades</small>
+                <p style="font-size: 1.1rem; color: #333; font-weight: 700; margin-top: 5px;">@ViewBag.TradeCount</p>
+            </div>
+            <div class="col-md-6">
+                <small style="font-weight: 600; color: #999; text-transform: uppercase; letter-spacing: 0.5px;">Total Exposure</small>
+                <p style="font-size: 1.1rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; margin-top: 5px;">
+                    @((decimal)ViewBag.TotalExposure).ToIndianCurrency()
+                </p>
             </div>
         </div>
     </div>
 
-    <!-- Risk Recommendations -->
-    <div class="card">
-        <div class="card-header bg-light">
-            <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Recommendations</h5>
-        </div>
-        <div class="card-body">
-            @if (riskLevel == "High")
-            {
-                <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Reduce exposure immediately</strong></li>
-                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Square off positions to manage risk</strong></li>
-                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Add additional margin funds</strong></li>
-                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Contact client for risk review</strong></li>
+    <!-- Recommendations Section -->
+    <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08); margin-bottom: 20px;">
+        <h5 style="font-weight: 700; color: #333; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem;">
+            <i class="fas fa-lightbulb" style="color: #f5576c;"></i> Recommendations
+        </h5>
+        @if (riskLevel == "High")
+        {
+            <div style="background: #fff3cd; padding: 20px; border-radius: 15px; border-left: 5px solid #f5576c;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-arrow-right" style="color: #f5576c; margin-right: 10px;"></i> <strong>Reduce exposure immediately</strong></li>
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-arrow-right" style="color: #f5576c; margin-right: 10px;"></i> <strong>Square off positions to manage risk</strong></li>
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-arrow-right" style="color: #f5576c; margin-right: 10px;"></i> <strong>Add additional margin funds</strong></li>
+                    <li style="color: #333;"><i class="fas fa-arrow-right" style="color: #f5576c; margin-right: 10px;"></i> <strong>Contact client for immediate risk review</strong></li>
                 </ul>
-            }
-            else if (riskLevel == "Medium")
-            {
-                <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Monitor positions closely</strong></li>
-                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Set stop-loss orders</strong></li>
-                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Review margin utilization</strong></li>
+            </div>
+        }
+        else if (riskLevel == "Medium")
+        {
+            <div style="background: #fff9e6; padding: 20px; border-radius: 15px; border-left: 5px solid #f093fb;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-arrow-right" style="color: #f093fb; margin-right: 10px;"></i> <strong>Monitor positions closely</strong></li>
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-arrow-right" style="color: #f093fb; margin-right: 10px;"></i> <strong>Set stop-loss orders</strong></li>
+                    <li style="color: #333;"><i class="fas fa-arrow-right" style="color: #f093fb; margin-right: 10px;"></i> <strong>Review margin utilization regularly</strong></li>
                 </ul>
-            }
-            else
-            {
-                <ul class="list-unstyled mb-0">
-                    <li><i class="fas fa-check-circle text-success"></i> <strong>Risk within acceptable limits</strong></li>
-                    <li><i class="fas fa-check-circle text-success"></i> <strong>Continue regular monitoring</strong></li>
-                    <li><i class="fas fa-check-circle text-success"></i> <strong>Client can increase positions if needed</strong></li>
+            </div>
+        }
+        else
+        {
+            <div style="background: #d4edda; padding: 20px; border-radius: 15px; border-left: 5px solid #11998e;">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-check-circle" style="color: #11998e; margin-right: 10px;"></i> <strong>Risk within acceptable limits</strong></li>
+                    <li style="margin-bottom: 12px; color: #333;"><i class="fas fa-check-circle" style="color: #11998e; margin-right: 10px;"></i> <strong>Continue regular monitoring</strong></li>
+                    <li style="color: #333;"><i class="fas fa-check-circle" style="color: #11998e; margin-right: 10px;"></i> <strong>Client can increase positions if needed</strong></li>
                 </ul>
-            }
-        </div>
+            </div>
+        }
     </div>
 
-    <!-- Raw JSON Data (Collapsible) -->
-    <div class="card mt-4">
-        <div class="card-header bg-light">
-            <a class="text-decoration-none text-dark" data-bs-toggle="collapse" href="#rawJson">
-                <i class="fas fa-code"></i> Raw Engine Output (JSON)
-                <i class="fas fa-chevron-down float-end"></i>
-            </a>
-        </div>
-        <div class="collapse" id="rawJson">
-            <div class="card-body">
-                <pre class="bg-dark text-white p-3 rounded"><code>@resultStr</code></pre>
-            </div>
+    <!-- Raw JSON Data -->
+    <div style="background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.08);">
+        <a href="#" style="text-decoration: none; color: #333; display: flex; justify-content: space-between; align-items: center;" 
+           data-bs-toggle="collapse" data-bs-target="#rawJson">
+            <h5 style="font-weight: 700; margin-bottom: 0; text-transform: uppercase; letter-spacing: 1px; font-size: 0.95rem;">
+                <i class="fas fa-code" style="color: #667eea;"></i> Raw Engine Output (JSON)
+            </h5>
+            <i class="fas fa-chevron-down" style="color: #667eea;"></i>
+        </a>
+        <div class="collapse mt-3" id="rawJson">
+            <pre style="background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 12px; overflow-x: auto; margin-bottom: 0; font-size: 0.85rem;"><code>@resultStr</code></pre>
         </div>
     </div>
 }
 else
 {
-    <div class="alert alert-warning">
-        <i class="fas fa-exclamation-triangle"></i>
-        <strong>No risk data available.</strong> Unable to perform risk analysis.
+    <div style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 5px solid #ffc107; padding: 20px; border-radius: 15px;">
+        <i class="fas fa-exclamation-triangle" style="color: #ff9800; font-size: 1.3rem; margin-right: 10px;"></i>
+        <strong style="color: #ff9800;">No risk data available.</strong> Unable to perform risk analysis at this moment.
     </div>
 }
-    </div>
-</div>
