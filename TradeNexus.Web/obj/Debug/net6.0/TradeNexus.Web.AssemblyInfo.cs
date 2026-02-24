@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TradeNexus.Web")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64e8de20c61475a52be6ca08928d96a10425f0df")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cbd22d25812aac899de037170314148afba04939")]
 [assembly: System.Reflection.AssemblyProductAttribute("TradeNexus.Web")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TradeNexus.Web")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
