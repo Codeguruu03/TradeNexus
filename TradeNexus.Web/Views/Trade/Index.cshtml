@@ -25,34 +25,44 @@
     </div>
 </div>
 
-<!-- KPI Dashboard Cards -->
-<div class="row g-4 mb-5">
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card primary position-relative">
-            <i class="fas fa-users icon"></i>
-            <h3>@totalClients</h3>
-            <p>Total Clients</p>
-        </div>
+<!-- Dashboard Summary Section -->
+<div style="background: white; padding: 35px; border-radius: 25px; box-shadow: 0 5px 30px rgba(0,0,0,0.08); margin-bottom: 50px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 style="font-size: 1.5rem; font-weight: 700; color: #2c3e50; margin: 0;">
+            <i class="fas fa-chart-line" style="color: #667eea; margin-right: 10px;"></i>Dashboard Summary
+        </h4>
+        <small style="color: #666; font-weight: 500;">Real-time Overview</small>
     </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card success position-relative">
-            <i class="fas fa-wallet icon"></i>
-            <h3>@totalMargin.ToIndianCurrency()</h3>
-            <p>Total Margin</p>
+    
+    <!-- KPI Dashboard Cards -->
+    <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card primary position-relative">
+                <i class="fas fa-users icon"></i>
+                <h3>@totalClients</h3>
+                <p>Total Clients</p>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card warning position-relative">
-            <i class="fas fa-chart-line icon"></i>
-            <h3>@avgMargin.ToIndianCurrency()</h3>
-            <p>Avg Margin/Client</p>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card success position-relative">
+                <i class="fas fa-wallet icon"></i>
+                <h3>@totalMargin.ToIndianCurrency()</h3>
+                <p>Total Margin</p>
+            </div>
         </div>
-    </div>
-    <div class="col-lg-3 col-md-6">
-        <div class="stat-card danger position-relative">
-            <i class="fas fa-building icon"></i>
-            <h3>@subBrokers</h3>
-            <p>Sub-Brokers</p>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card warning position-relative">
+                <i class="fas fa-chart-line icon"></i>
+                <h3>@avgMargin.ToIndianCurrency()</h3>
+                <p>Avg Margin/Client</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card danger position-relative">
+                <i class="fas fa-building icon"></i>
+                <h3>@subBrokers</h3>
+                <p>Sub-Brokers</p>
+            </div>
         </div>
     </div>
 </div>
@@ -105,68 +115,96 @@
                         if (exposurePercent > 100) exposurePercent = 100;
 
                         <div class="col-xl-4 col-lg-6 col-md-6 mb-4 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
-                            <div class="card h-100" style="border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s;">
+                            <div class="card h-100" style="border-radius: 18px; border: 2px solid #e8e8e8; box-shadow: 0 3px 15px rgba(0,0,0,0.05); transition: all 0.3s; background: white;"
+                                 onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.12)'; this.style.borderColor='#667eea'"
+                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 15px rgba(0,0,0,0.05)'; this.style.borderColor='#e8e8e8'">
                                 <div class="card-body p-0">
-                                    <!-- Header with Risk Badge -->
-                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 20px 20px 0 0; position: relative;">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h5 class="mb-1" style="font-weight: 800;">@item.ClientName</h5>
-                                                <small>Code: <strong>@item.ClientCode</strong></small>
+                                    <!-- Clean Header with Risk Badge -->
+                                    <div style="background: #f8f9fa; border-bottom: 2px solid #e0e0e0; padding: 20px; border-radius: 16px 16px 0 0; position: relative;">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <div style="flex: 1;">
+                                                <h5 class="mb-1" style="font-weight: 700; color: #2c3e50; font-size: 1.15rem;">@item.ClientName</h5>
+                                                <small style="color: #666; font-weight: 600;">Code: <strong style="color: #667eea;">@item.ClientCode</strong></small>
                                             </div>
-                                            <span class="badge bg-@riskColor" style="padding: 8px 15px; font-size: 0.8rem;">
+                                            <span class="badge" style="padding: 8px 15px; font-size: 0.75rem; font-weight: 600; @(riskLevel == "Low" ? "background: #d4edda; color: #155724;" : "background: #f8d7da; color: #721c24;")">
                                                 <i class="fas fa-shield-alt"></i> @riskLevel Risk
                                             </span>
                                         </div>
                                     </div>
 
                                     <!-- Content -->
-                                    <div style="padding: 20px;">
-                                        <!-- Client Details Grid -->
-                                        <div class="row mb-4">
-                                            <div class="col-6 mb-3">
-                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">PAN</small>
-                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">@item.PAN</strong>
+                                    <div style="padding: 25px 20px;">
+                                        <!-- PRIMARY: Margin Available (Financial Priority) -->
+                                        <div style="text-align: center; margin-bottom: 25px; padding: 20px; background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%); border-radius: 15px; border: 2px solid @(item.MarginAvailable >= 500000 ? "#d4edda" : item.MarginAvailable >= 200000 ? "#fff3cd" : "#f8d7da");">
+                                            <div style="display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 8px;">
+                                                <i class="fas fa-wallet" style="font-size: 1.8rem; color: @(item.MarginAvailable >= 500000 ? "#28a745" : item.MarginAvailable >= 200000 ? "#ff9800" : "#dc3545");"></i>
+                                                <small style="color: #666; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Margin Available</small>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Location</small>
-                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">
-                                                    <i class="fas fa-map-marker-alt" style="color: #eb3349;"></i> @item.City, @item.State
-                                                </strong>
+                                            <div style="font-size: 2rem; font-weight: 900; color: @(item.MarginAvailable >= 500000 ? "#28a745" : item.MarginAvailable >= 200000 ? "#ff9800" : "#dc3545"); line-height: 1; font-family: 'Poppins', sans-serif;">
+                                                @item.MarginAvailable.ToIndianCurrency()
                                             </div>
-                                            <div class="col-6">
-                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Sub-Broker</small>
-                                                <strong class="d-block" style="color: #333; font-size: 0.95rem;">@item.SubBrokerCode</strong>
-                                                <small style="color: #666;">@item.SubBrokerName</small>
+                                            @if (item.MarginAvailable >= 500000)
+                                            {
+                                                <small style="color: #28a745; font-weight: 600; font-size: 0.75rem; margin-top: 5px; display: block;">
+                                                    <i class="fas fa-check-circle"></i> Healthy Position
+                                                </small>
+                                            }
+                                            else if (item.MarginAvailable >= 200000)
+                                            {
+                                                <small style="color: #ff9800; font-weight: 600; font-size: 0.75rem; margin-top: 5px; display: block;">
+                                                    <i class="fas fa-exclamation-circle"></i> Moderate Level
+                                                </small>
+                                            }
+                                            else
+                                            {
+                                                <small style="color: #dc3545; font-weight: 600; font-size: 0.75rem; margin-top: 5px; display: block;">
+                                                    <i class="fas fa-exclamation-triangle"></i> Low Margin Alert
+                                                </small>
+                                            }
+                                        </div>
+
+                                        <!-- Margin Utilization Progress (Prominent) -->
+                                        <div style="margin-bottom: 20px; padding: 15px; background: #fafbfc; border-radius: 12px; border-left: 4px solid @(exposurePercent > 80 ? "#dc3545" : exposurePercent > 50 ? "#ff9800" : "#28a745");">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <span style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #555;">
+                                                    <i class="fas fa-chart-pie" style="color: @(exposurePercent > 80 ? "#dc3545" : exposurePercent > 50 ? "#ff9800" : "#28a745");"></i> Utilization
+                                                </span>
+                                                <span style="font-weight: 800; color: @(exposurePercent > 80 ? "#dc3545" : exposurePercent > 50 ? "#ff9800" : "#28a745"); font-size: 1.1rem;">@Math.Round(exposurePercent, 1)%</span>
                                             </div>
-                                            <div class="col-6">
-                                                <small class="text-muted d-block mb-1" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Margin Available</small>
-                                                <strong class="d-block" style="font-size: 1.2rem; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                                                    @item.MarginAvailable.ToIndianCurrency()
-                                                </strong>
+                                            <div class="progress" style="height: 12px; border-radius: 10px; background: #e8e8e8; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                                                <div class="progress-bar" style="width: @exposurePercent%; background: @(exposurePercent > 80 ? "linear-gradient(90deg, #dc3545, #c82333)" : exposurePercent > 50 ? "linear-gradient(90deg, #ff9800, #f57c00)" : "linear-gradient(90deg, #28a745, #20c997)"); border-radius: 10px; transition: all 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></div>
                                             </div>
                                         </div>
 
-                                        <!-- Margin Utilization Progress Bar -->
-                                        <div class="mb-4">
-                                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                                <small class="text-muted" style="font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.5px;">Margin Utilization</small>
-                                                <small style="font-weight: 700; color: #667eea;">@Math.Round(exposurePercent, 1)%</small>
+                                        <!-- SECONDARY: Client Details (Supporting Info) -->
+                                        <div class="row mb-3">
+                                            <div class="col-4">
+                                                <small style="color: #999; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: block; margin-bottom: 4px;">PAN</small>
+                                                <span style="color: #555; font-size: 0.8rem; font-weight: 600;">@item.PAN</span>
                                             </div>
-                                            <div class="progress" style="height: 8px; border-radius: 10px; background: #e0e0e0;">
-                                                <div class="progress-bar" style="width: @exposurePercent%; background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%); border-radius: 10px;"></div>
+                                            <div class="col-4">
+                                                <small style="color: #999; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: block; margin-bottom: 4px;">City</small>
+                                                <span style="color: #555; font-size: 0.8rem; font-weight: 600;">@item.City</span>
+                                            </div>
+                                            <div class="col-4">
+                                                <small style="color: #999; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; display: block; margin-bottom: 4px;">Sub-Broker</small>
+                                                <span style="color: #555; font-size: 0.8rem; font-weight: 600;">@item.SubBrokerCode</span>
                                             </div>
                                         </div>
 
                                         <!-- Action Buttons -->
                                         <div class="d-flex gap-2">
-                                            <button type="button" class="btn btn-primary flex-grow-1" style="border-radius: 12px; font-weight: 600; padding: 12px; font-size: 0.9rem;"
+                                            <button type="button" class="btn" style="flex: 1; border-radius: 10px; font-weight: 600; padding: 11px; font-size: 0.85rem; background: #667eea; color: white; border: none; transition: all 0.3s;"
+                                                    onmouseover="this.style.background='#5568d3'; this.style.transform='translateY(-2px)'" 
+                                                    onmouseout="this.style.background='#667eea'; this.style.transform='translateY(0)'"
                                                     onclick="viewTrades(@item.ClientId, '@item.ClientName', '@item.ClientCode')">
-                                                <i class="fas fa-chart-line"></i> View Trades
+                                                <i class="fas fa-chart-line"></i> Trades
                                             </button>
-                                            <button type="button" class="btn btn-warning flex-grow-1" style="border-radius: 12px; font-weight: 600; padding: 12px; font-size: 0.9rem; color: white;"
+                                            <button type="button" class="btn" style="flex: 1; border-radius: 10px; font-weight: 600; padding: 11px; font-size: 0.85rem; background: #6c757d; color: white; border: none; transition: all 0.3s;"
+                                                    onmouseover="this.style.background='#5a6268'; this.style.transform='translateY(-2px)'" 
+                                                    onmouseout="this.style.background='#6c757d'; this.style.transform='translateY(0)'"
                                                     onclick="analyzeRisk(@item.ClientId, '@item.ClientName')">
-                                                <i class="fas fa-exclamation-triangle"></i> Risk Analysis
+                                                <i class="fas fa-chart-pie"></i> Risk
                                             </button>
                                         </div>
                                     </div>
