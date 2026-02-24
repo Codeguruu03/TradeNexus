@@ -11,13 +11,14 @@ namespace TradeNexus.Web
         {
             var host = CreateHostBuilder(args).Build();
 
-            // Initialize database
-            using (var scope = host.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var context = services.GetRequiredService<ApplicationDbContext>();
-                DbInitializer.Initialize(context);
-            }
+            // Database already exists on remote SQL Server
+            // No need for DbInitializer
+            // using (var scope = host.Services.CreateScope())
+            // {
+            //     var services = scope.ServiceProvider;
+            //     var context = services.GetRequiredService<ApplicationDbContext>();
+            //     DbInitializer.Initialize(context);
+            // }
 
             host.Run();
         }

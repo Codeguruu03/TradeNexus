@@ -1,52 +1,192 @@
+@using TradeNexus.Web.Helpers
 @{
-    ViewData["Title"] = "Risk Analysis";
     var resultStr = ViewBag.RiskResult as string;
-    dynamic result = Newtonsoft.Json.JsonConvert.DeserializeObject(resultStr);
+    dynamic result = null;
+    string errorMessage = null;
+    
+    try
+    {
+        result = Newtonsoft.Json.JsonConvert.DeserializeObject(resultStr);
+    }
+    catch
+    {
+        errorMessage = "Failed to parse risk analysis result.";
+    }
 }
 
-<div class="pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Risk Analysis Result</h1>
-    <p class="text-muted">Client ID: @ViewBag.ClientId</p>
-</div>
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i> @errorMessage
+    </div>
+}
+else if (result != null)
+{
+    var riskLevel = result.riskLevel?.ToString() ?? "Unknown";
+    var riskColor = riskLevel == "High" ? "danger" : (riskLevel == "Medium" ? "warning" : "success");
+    var totalExposure = result.totalExposure?.ToString() ?? "0";
+    var requiredMargin = result.requiredMargin?.ToString() ?? "0";
+    var limitBreach = result.limitBreach == true;
 
-<div class="row">
-    <div class="col-md-6">
-        <div class="card border-@(result.riskLevel == "High" ? "danger" : (result.riskLevel == "Medium" ? "warning" : "success")) shadow">
-            <div class="card-header bg-@(result.riskLevel == "High" ? "danger" : (result.riskLevel == "Medium" ? "warning" : "success")) text-white">
-                <h5 class="card-title mb-0">Risk Level: @result.riskLevel</h5>
+    <!-- Risk Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-@riskColor">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-3x text-@riskColor mb-3"></i>
+                    <h2 class="text-@riskColor">@riskLevel</h2>
+                    <p class="mb-0 text-muted">Risk Level</p>
+                </div>
             </div>
-            <div class="card-body">
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Total Exposure
-                        <span class="badge badge-primary badge-pill">@result.totalExposure</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Required Margin (20%)
-                        <span class="badge badge-info badge-pill">@result.requiredMargin</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Limit Breach Detected
-                        <span class="badge badge-@(result.limitBreach == true ? "danger" : "light") badge-pill">
-                            @(result.limitBreach == true ? "YES" : "NO")
-                        </span>
-                    </li>
-                </ul>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                    <h2 class="text-primary">@totalExposure</h2>
+                    <p class="mb-0 text-muted">Total Exposure</p>
+                </div>
             </div>
-            <div class="card-footer text-center">
-                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-wallet fa-3x text-info mb-3"></i>
+                    <h2 class="text-info">@requiredMargin</h2>
+                    <p class="mb-0 text-muted">Required Margin (20%)</p>
+                </div>
             </div>
         </div>
     </div>
-    
-    <div class="col-md-6">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                Raw Engine Output (JSON)
-            </div>
-            <div class="card-body">
-                <pre class="bg-light p-3"><code>@resultStr</code></pre>
+
+    <!-- Risk Meter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">
+                <i class="fas fa-tachometer-alt"></i> Risk Meter
+            </h5>
+            <div class="progress" style="height: 40px;">
+                @if (riskLevel == "Low")
+                {
+                    <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 25%">
+                        Low Risk (25%)
+                    </div>
+                }
+                else if (riskLevel == "Medium")
+                {
+                    <div class="progress-bar bg-warning progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 60%">
+                        Medium Risk (60%)
+                    </div>
+                }
+                else
+                {
+                    <div class="progress-bar bg-danger progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 90%">
+                        High Risk (90%)
+                    </div>
+                }
             </div>
         </div>
+    </div>
+
+    <!-- Limit Breach Alert -->
+    @if (limitBreach)
+    {
+        <div class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading">Margin Limit Breach Detected!</h5>
+                <p class="mb-0">The client's exposure exceeds the available margin. Immediate action required.</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="fas fa-check-circle fa-2x me-3"></i>
+            <div>
+                <h5 class="alert-heading">Within Margin Limits</h5>
+                <p class="mb-0">The client's trading activity is within acceptable margin limits.</p>
+            </div>
+        </div>
+    }
+
+    <!-- Client Info -->
+    <div class="card mb-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-user"></i> Client Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Client Name:</strong> @ViewBag.ClientName</p>
+                    <p><strong>Client ID:</strong> @ViewBag.ClientId</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Total Trades:</strong> @ViewBag.TradeCount</p>
+                    <p><strong>Total Exposure:</strong> @((decimal)ViewBag.TotalExposure).ToIndianCurrency()</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Recommendations -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Recommendations</h5>
+        </div>
+        <div class="card-body">
+            @if (riskLevel == "High")
+            {
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Reduce exposure immediately</strong></li>
+                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Square off positions to manage risk</strong></li>
+                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Add additional margin funds</strong></li>
+                    <li><i class="fas fa-check-circle text-danger"></i> <strong>Contact client for risk review</strong></li>
+                </ul>
+            }
+            else if (riskLevel == "Medium")
+            {
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Monitor positions closely</strong></li>
+                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Set stop-loss orders</strong></li>
+                    <li><i class="fas fa-check-circle text-warning"></i> <strong>Review margin utilization</strong></li>
+                </ul>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    <li><i class="fas fa-check-circle text-success"></i> <strong>Risk within acceptable limits</strong></li>
+                    <li><i class="fas fa-check-circle text-success"></i> <strong>Continue regular monitoring</strong></li>
+                    <li><i class="fas fa-check-circle text-success"></i> <strong>Client can increase positions if needed</strong></li>
+                </ul>
+            }
+        </div>
+    </div>
+
+    <!-- Raw JSON Data (Collapsible) -->
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <a class="text-decoration-none text-dark" data-bs-toggle="collapse" href="#rawJson">
+                <i class="fas fa-code"></i> Raw Engine Output (JSON)
+                <i class="fas fa-chevron-down float-end"></i>
+            </a>
+        </div>
+        <div class="collapse" id="rawJson">
+            <div class="card-body">
+                <pre class="bg-dark text-white p-3 rounded"><code>@resultStr</code></pre>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>No risk data available.</strong> Unable to perform risk analysis.
+    </div>
+}
     </div>
 </div>

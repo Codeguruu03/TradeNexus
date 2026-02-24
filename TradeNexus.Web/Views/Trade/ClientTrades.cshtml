@@ -1,0 +1,157 @@
+@model IEnumerable<TradeNexus.Web.Models.Trade>
+@using TradeNexus.Web.Helpers
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        <i class="fas fa-exclamation-triangle"></i>
+        <strong>No trades found</strong> for this client.
+    </div>
+}
+else
+{
+    var totalTrades = Model.Count();
+    var totalValue = Model.Sum(t => t.Quantity * t.Price);
+    var totalBrokerage = Model.Sum(t => t.Brokerage);
+    var buyTrades = Model.Count(t => t.BuySell == "BUY");
+    var sellTrades = Model.Count(t => t.BuySell == "SELL");
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@totalTrades</h3>
+                    <small>Total Trades</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@totalValue.ToIndianCurrency()</h3>
+                    <small>Total Value</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@buyTrades</h3>
+                    <small>Buy Orders</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white">
+                <div class="card-body text-center">
+                    <h3 class="mb-0">@sellTrades</h3>
+                    <small>Sell Orders</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trade Table -->
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Date</th>
+                    <th>Symbol</th>
+                    <th>Segment</th>
+                    <th>Type</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Value</th>
+                    <th>Charges</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var trade in Model.OrderByDescending(t => t.TradeDate))
+                {
+                    var tradeValue = trade.Quantity * trade.Price;
+                    var totalCharges = trade.Brokerage + trade.ExchangeCharges + trade.SEBIFee + trade.StampDuty + trade.STT + trade.GST;
+                    
+                    <tr>
+                        <td>
+                            <small>@trade.TradeDate.ToString("dd-MMM-yyyy")</small>
+                        </td>
+                        <td>
+                            <strong class="text-primary">@trade.Symbol</strong>
+                            <br><small class="text-muted">@trade.Exchange</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-secondary">@trade.Segment</span>
+                        </td>
+                        <td>
+                            @if (trade.BuySell == "BUY")
+                            {
+                                <span class="badge bg-success">
+                                    <i class="fas fa-arrow-up"></i> BUY
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">
+                                    <i class="fas fa-arrow-down"></i> SELL
+                                </span>
+                            }
+                        </td>
+                        <td>@trade.Quantity</td>
+                        <td>@trade.Price.ToString("N2")</td>
+                        <td><strong>@tradeValue.ToIndianCurrency()</strong></td>
+                        <td>
+                            <span class="text-muted" title="Brokerage + Exchange + SEBI + Stamp + STT + GST">
+                                @totalCharges.ToIndianCurrencyWithDecimals()
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot class="table-light">
+                <tr>
+                    <td colspan="6" class="text-end"><strong>Total:</strong></td>
+                    <td><strong>@totalValue.ToIndianCurrency()</strong></td>
+                    <td><strong>@totalBrokerage.ToIndianCurrency()</strong></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Chart -->
+    <div class="mt-4">
+        <canvas id="tradeChart" height="80"></canvas>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var buyCount = @buyTrades;
+            var sellCount = @sellTrades;
+            
+            var ctx = document.getElementById('tradeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Buy Orders', 'Sell Orders'],
+                    datasets: [{
+                        data: [buyCount, sellCount],
+                        backgroundColor: ['#28a745', '#dc3545']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Trade Distribution'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}
