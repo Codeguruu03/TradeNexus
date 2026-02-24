@@ -26,7 +26,7 @@
 </div>
 
 <!-- KPI Dashboard Cards -->
-<div class="row mb-4">
+<div class="row g-4 mb-5">
     <div class="col-lg-3 col-md-6">
         <div class="stat-card primary position-relative">
             <i class="fas fa-users icon"></i>
@@ -60,11 +60,11 @@
 <!-- Client Portfolio Section -->
 <div class="row">
     <div class="col-12">
-        <div class="data-table-wrapper">
+        <div class="mb-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h4 class="mb-0"><i class="fas fa-th-list"></i> Client Portfolio</h4>
-                    <small class="text-muted">Manage and monitor all client accounts</small>
+                    <h4 class="mb-1" style="font-size: 1.8rem; font-weight: 700; color: #333;"><i class="fas fa-users-cog"></i> Client Portfolio</h4>
+                    <small style="color: #666; font-size: 0.95rem;">Manage and monitor all client accounts</small>
                 </div>
                 <div class="btn-group">
                     <button class="btn btn-sm btn-primary" onclick="exportToExcel()">
@@ -78,11 +78,12 @@
 
             <!-- Search & Filter -->
             <div class="mb-4">
-                <div class="input-group">
-                    <span class="input-group-text" style="background: #f0f0f0; border: none;">
-                        <i class="fas fa-search"></i>
+                <div class="input-group" style="max-width: 500px;">
+                    <span class="input-group-text" style="background: white; border: 2px solid #e0e0e0; border-right: none; border-radius: 15px 0 0 15px;">
+                        <i class="fas fa-search" style="color: #667eea;"></i>
                     </span>
-                    <input type="text" class="form-control" id="clientSearch" placeholder="Search by client name, code, or location..." style="border-left: none;">
+                    <input type="text" class="form-control" id="clientSearch" placeholder="Search by client name, code, or location..." 
+                           style="border: 2px solid #e0e0e0; border-left: none; border-radius: 0 15px 15px 0; padding: 12px; font-weight: 500;">
                 </div>
             </div>
 
@@ -95,7 +96,7 @@
             }
             else
             {
-                <div class="row" id="clientCardsContainer">
+                <div class="row g-4" id="clientCardsContainer">
                     @foreach (var item in clients)
                     {
                         var riskLevel = item.MarginAvailable > 0 ? "Low" : "High";
@@ -103,7 +104,7 @@
                         var exposurePercent = ((item.Quantity * item.Price) / item.MarginAvailable * 100);
                         if (exposurePercent > 100) exposurePercent = 100;
 
-                        <div class="col-lg-6 mb-4 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
+                        <div class="col-xl-4 col-lg-6 col-md-6 mb-4 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
                             <div class="card h-100" style="border-radius: 20px; border: none; box-shadow: 0 5px 20px rgba(0,0,0,0.08); transition: all 0.3s;">
                                 <div class="card-body p-0">
                                     <!-- Header with Risk Badge -->
