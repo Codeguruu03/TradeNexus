@@ -1,0 +1,5 @@
+TradeId,ClientId,ClientCode,ClientName,PAN,City,State,MarginAvailable,SubBrokerId,SubBrokerCode,SubBrokerName,InstrumentId,Symbol,Segment,Exchange,LotSize,TradeDate,BuySell,Quantity,Price,Brokerage,ExchangeCharges,SEBIFee,StampDuty,STT,GST,VaRPercent,ExposurePercent
+1,1,CL001,Rahul Sharma,ABCDE1234F,Mumbai,Maharashtra,500000,1,SB001,Alpha Broking,1,RELIANCE,CAPITAL,NSE,1,2024-01-15,BUY,100,2500,500,50,5,25,100,90,12,5
+2,1,CL001,Rahul Sharma,ABCDE1234F,Mumbai,Maharashtra,500000,1,SB001,Alpha Broking,2,TCS,CAPITAL,NSE,1,2024-01-15,SELL,50,3600,300,30,3,10,120,60,10,4
+3,2,CL002,Priya Mehta,FGHIJ5678K,Delhi,Delhi,750000,2,SB002,Beta Capital,3,NIFTY24JANFUT,FUTURES,NSE,50,2024-01-16,BUY,1,22000,1000,100,10,50,200,180,15,6
+4,3,CL003,Amit Verma,KLMNO9012P,Bangalore,Karnataka,300000,3,SB003,Gamma Securities,4,BANKNIFTY24JANFUT,FUTURES,NSE,15,2024-01-16,SELL,2,48000,1500,150,15,75,300,270,18,7
