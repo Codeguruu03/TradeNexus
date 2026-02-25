@@ -23,6 +23,6 @@ def calculate_risk(data):
     }
 
 if __name__ == "__main__":
-    input_data = json.loads(sys.argv[1])
+    input_data = json.loads(sys.stdin.read())
     result = calculate_risk(input_data)
     print(json.dumps(result))
