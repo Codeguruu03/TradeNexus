@@ -8,15 +8,18 @@ The system allows a master broker to:
 - **Onboard Sub-Brokers**: Manage multiple brokerage companies under one platform.
 - **Client Management**: Sub-brokers can create and manage their own clients.
 - **Risk Management**: A hybrid C# and Python engine analyzes trade data to detect margin breaches and risk levels.
+- **RESTful APIs**: Complete API endpoints with role-based access control for integration.
 - **Enterprise Ready**: Designed to be hosted on IIS with MSSQL for robust data storage.
 
 ## 🛠 Tech Stack
 
-- **Backend**: ASP.NET Core MVC (C#)
+- **Backend**: ASP.NET Core MVC (C#) + .NET 10.0
 - **Database**: Microsoft SQL Server (MSSQL)
 - **Quant/Risk Engine**: Python 3
-- **ORM**: Entity Framework Core
+- **ORM**: Entity Framework Core 10.0
 - **Frontend**: Razor Views + Bootstrap 4
+- **API**: RESTful APIs with Basic Authentication
+- **Security**: Role-Based Access Control (RBAC)
 
 ## 📂 Project Structure
 

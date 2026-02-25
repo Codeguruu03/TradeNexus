@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -5,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TradeNexus.Web.Data;
+using TradeNexus.Web.Helpers;
 using TradeNexus.Web.Services;
 
 namespace TradeNexus.Web
@@ -24,6 +26,11 @@ namespace TradeNexus.Web
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+
+            services.AddAuthentication("Basic")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
+
+            services.AddAuthorization();
 
             // Register PythonRiskService for DI
             services.AddScoped<PythonRiskService>();
@@ -46,6 +53,7 @@ namespace TradeNexus.Web
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
