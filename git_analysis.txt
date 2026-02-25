@@ -1,0 +1,325 @@
+﻿COMMIT: 191d3bac48925fe6f403175478251bc638a5e335
+AUTHOR: Codeguruu
+DATE: 2026-02-25
+MSG: feat: Introduce Python scripts for SQL Server table creation and bulk trade data generation, alongside sample trade records.
+---
+
+A	1.py
+A	2.py
+A	clients.csv
+COMMIT: 4dd73d587d916c73d23d479496deec66b4facce9
+AUTHOR: Codeguruu
+DATE: 2026-02-25
+MSG: fix: Remove all /obj/ build artifacts from git tracking, add .gitignore, add VS solution files, views, README
+---
+COMMIT: ebc31fc5b8a6a9c50b7aab9956f4fd5a059dfe5c
+AUTHOR: Codeguruu
+DATE: 2026-02-25
+MSG: chore: Add .gitignore, remove tracked build artifacts, add VS solution + project files, views, README
+---
+
+M	.gitignore
+D	TradeNexus.Web/obj/Debug/net6.0/.NETCoreApp,Version=v6.0.AssemblyAttributes.cs
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfo.cs
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfoInputs.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.MvcApplicationPartsAssemblyInfo.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.RazorAssemblyInfo.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.RazorAssemblyInfo.cs
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.assets.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.AssemblyReference.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.CoreCompileInputs.cache
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.FileListAbsolute.txt
+D	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.sourcelink.json
+D	TradeNexus.Web/obj/Debug/net6.0/rpswa.dswa.cache.json
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/.NETCoreApp,Version=v3.1.AssemblyAttributes.cs
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfo.cs
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfoInputs.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.MvcApplicationPartsAssemblyInfo.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.RazorAssemblyInfo.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.RazorAssemblyInfo.cs
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.assets.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.AssemblyReference.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.CoreCompileInputs.cache
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.FileListAbsolute.txt
+D	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.sourcelink.json
+D	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+D	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+D	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.targets
+D	TradeNexus.Web/obj/project.assets.json
+D	TradeNexus.Web/obj/project.nuget.cache
+COMMIT: 23fe047f547195b75fe52c5e5ffa298e2796bc4d
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Refactor Trade Dashboard layout and improve KPI card styling for better responsiveness
+---
+
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 62a7f3c7b19dc208b2b16221d606f3d263539328
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Adjust layout and styling for Trade Dashboard KPI cards and improve responsiveness
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 01a6d8ba410c4209921386dde8441228f865954c
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Refactor layout and styling for Dashboard Summary and KPI Cards
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 8a97cfec3f8eb65cf5c2e8f394d2b5607fe52cb2
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Update Trade Dashboard and Client Portfolio UI with improved color scheme and layout enhancements
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 268c45b2433f635d8f0e6168b3cbc0d9c09c7394
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Refine layout and styling for Trade Dashboard and Client Portfolio
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: b15aff6b42f7a154d437830bca80672ee157436c
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: feat: Implement client risk categorization and sorting in Trade Dashboard
+---
+
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 5b7ad8bb178508547e3cd47c3e250d1b36afee7b
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Enhance Trade Dashboard layout and improve client card design
+---
+
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 895a5976353ade2f1a3281f32305536d69a64af3
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: style: Improve layout and styling for Trade Dashboard and Client Portfolio
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+COMMIT: 7c85cb38dfda279f203195434bd8898f8e94994b
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: Enhance Trade Dashboard and Risk Result UI
+---
+
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+M	TradeNexus.Web/Views/Trade/ClientTrades.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+M	TradeNexus.Web/Views/Trade/RiskResult.cshtml
+COMMIT: df04b1f1944bc65ca3af875cca494c9075dec035
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: feat: Add Indian currency formatting helper and client trades view
+---
+
+M	TradeNexus.Web/Controllers/TradeController.cs
+M	TradeNexus.Web/Data/ApplicationDbContext.cs
+A	TradeNexus.Web/Helpers/FormatHelper.cs
+M	TradeNexus.Web/Models/Trade.cs
+M	TradeNexus.Web/Program.cs
+M	TradeNexus.Web/TradeNexus.Web.csproj
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+A	TradeNexus.Web/Views/Trade/ClientTrades.cshtml
+M	TradeNexus.Web/Views/Trade/Index.cshtml
+M	TradeNexus.Web/Views/Trade/RiskResult.cshtml
+A	TradeNexus.Web/Views/_ViewImports.cshtml
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.assets.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.AssemblyReference.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.CoreCompileInputs.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.FileListAbsolute.txt
+M	TradeNexus.Web/obj/Debug/net6.0/rpswa.dswa.cache.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.targets
+M	TradeNexus.Web/obj/project.assets.json
+M	TradeNexus.Web/obj/project.nuget.cache
+A	clients.csv
+COMMIT: 65dbcf17cf9f34e17e139dbe350895921d642511
+AUTHOR: Naman Goyal
+DATE: 2026-02-24
+MSG: update in the following files: - TradeNexus.Web/TradeNexus.Web.csproj - TradeNexus.Web/Views/Trade/ClientTrades.cshtml - TradeNexus.Web/Views/Trade/RiskResult.cshtml - TradeNexus.Web/Views/_ViewImports.cshtml
+---
+
+A	1.py
+A	2.py
+M	TradeNexus.Web/Program.cs
+M	TradeNexus.Web/Startup.cs
+M	TradeNexus.Web/TradeNexus.Web.csproj
+M	TradeNexus.Web/appsettings.json
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfo.cs
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfoInputs.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.assets.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.AssemblyReference.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.CoreCompileInputs.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.FileListAbsolute.txt
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.sourcelink.json
+M	TradeNexus.Web/obj/Debug/net6.0/rpswa.dswa.cache.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+M	TradeNexus.Web/obj/project.assets.json
+M	TradeNexus.Web/obj/project.nuget.cache
+COMMIT: cbd22d25812aac899de037170314148afba04939
+AUTHOR: Naman Goyal
+DATE: 2026-02-23
+MSG: Merge branch 'main' of https://github.com/Codeguruu03/TradeNexus
+---
+COMMIT: ae36ed18c514354730c49dee0efef735ef2a793c
+AUTHOR: Naman Goyal
+DATE: 2026-02-23
+MSG: Upgrade to .NET 6 with SQLite, reorganize project structure, add DbInitializer
+---
+
+A	.gitignore
+A	TradeNexus.Web/Data/DbInitializer.cs
+R100	Program.cs	TradeNexus.Web/Program.cs
+R094	Startup.cs	TradeNexus.Web/Startup.cs
+M	TradeNexus.Web/TradeNexus.Web.csproj
+M	TradeNexus.Web/Views/Shared/_Layout.cshtml
+A	TradeNexus.Web/appsettings.json
+D	appsettings.json
+COMMIT: 5ca41a07f13163f4ae469d0400f2e6b7d58de069
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: chore: Add initial generated build and NuGet package restore files for the web project.
+---
+
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfo.cs
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfoInputs.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.assets.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.AssemblyReference.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.CoreCompileInputs.cache
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.FileListAbsolute.txt
+M	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.sourcelink.json
+M	TradeNexus.Web/obj/Debug/net6.0/rpswa.dswa.cache.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+M	TradeNexus.Web/obj/project.assets.json
+M	TradeNexus.Web/obj/project.nuget.cache
+COMMIT: 64e8de20c61475a52be6ca08928d96a10425f0df
+AUTHOR: Naman Goyal
+DATE: 2026-02-23
+MSG: Update NuGet package references and project file path in project.nuget.cache
+---
+
+A	.vs/TradeNexus/v16/.suo
+A	.vs/VSWorkspaceState.json
+A	.vs/slnx.sqlite
+M	TradeNexus.Web/TradeNexus.Web.csproj
+A	TradeNexus.Web/obj/Debug/net6.0/.NETCoreApp,Version=v6.0.AssemblyAttributes.cs
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfo.cs
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.AssemblyInfoInputs.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.MvcApplicationPartsAssemblyInfo.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.RazorAssemblyInfo.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.RazorAssemblyInfo.cs
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.assets.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.AssemblyReference.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.CoreCompileInputs.cache
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.csproj.FileListAbsolute.txt
+A	TradeNexus.Web/obj/Debug/net6.0/TradeNexus.Web.sourcelink.json
+A	TradeNexus.Web/obj/Debug/net6.0/rpswa.dswa.cache.json
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfo.cs
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfoInputs.cache
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.assets.cache
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.AssemblyReference.cache
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.CoreCompileInputs.cache
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.FileListAbsolute.txt
+M	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.sourcelink.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+M	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+M	TradeNexus.Web/obj/project.assets.json
+M	TradeNexus.Web/obj/project.nuget.cache
+COMMIT: d384fc84239080ec37c68ca72539cbd8ff6efbd9
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: docs: Add initial README.md detailing project overview, tech stack, setup instructions, and risk engine logic.
+---
+
+A	README.md
+COMMIT: b69342d8e65c1461bf29662b22aaa8c36e3de59f
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: feat: Add web application with TradeController and views for trade risk analysis.
+---
+
+M	Program.cs
+M	Startup.cs
+M	TradeNexus.Web/Controllers/TradeController.cs
+A	TradeNexus.Web/TradeNexus.Web.csproj
+A	TradeNexus.Web/Views/Shared/_Layout.cshtml
+A	TradeNexus.Web/Views/Trade/Index.cshtml
+A	TradeNexus.Web/Views/Trade/RiskResult.cshtml
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/.NETCoreApp,Version=v3.1.AssemblyAttributes.cs
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfo.cs
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.AssemblyInfoInputs.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.GeneratedMSBuildEditorConfig.editorconfig
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.MvcApplicationPartsAssemblyInfo.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.RazorAssemblyInfo.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.RazorAssemblyInfo.cs
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.assets.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.AssemblyReference.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.CoreCompileInputs.cache
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.csproj.FileListAbsolute.txt
+A	TradeNexus.Web/obj/Debug/netcoreapp3.1/TradeNexus.Web.sourcelink.json
+A	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.dgspec.json
+A	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.props
+A	TradeNexus.Web/obj/TradeNexus.Web.csproj.nuget.g.targets
+A	TradeNexus.Web/obj/project.assets.json
+A	TradeNexus.Web/obj/project.nuget.cache
+A	TradeNexus.sln
+COMMIT: 445f91f8212b1a3f283e55f4f366e6b1466ce541
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: feat: Implement trade risk calculation by adding a new controller, service, and Python engine integration.
+---
+
+M	Startup.cs
+M	TradeNexus.Web/Controllers/TradeController.cs
+M	TradeNexus.Web/Services/PythonRiskService.cs
+COMMIT: 62bf2718003a2d09534fadfdbcb3080166c0b5b7
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: feat: implement initial web application structure with data models, database context, and Python risk engine integration.
+---
+
+R100	PythonEngine/risk_engine.py	Program.cs
+A	Startup.cs
+M	TradeNexus.Web/Data/ApplicationDbContext.cs
+M	TradeNexus.Web/Models/Client.cs
+M	TradeNexus.Web/Models/SubBroker.cs
+M	TradeNexus.Web/Models/Trade.cs
+A	TradeNexus.Web/PythonEngine/risk_engine.py
+A	TradeNexus.Web/Services/PythonRiskService.cs
+A	appsettings.json
+COMMIT: d0de3bfbce8338b39d7c037df13ab76f250ab346
+AUTHOR: Codeguruu
+DATE: 2026-02-23
+MSG: feat: Establish initial trading system with Python risk engine, data models, and web API.
+---
+
+A	PythonEngine/risk_engine.py
+A	TradeNexus.Core
+A	TradeNexus.Data
+A	TradeNexus.Web/Controllers/TradeController.cs
+A	TradeNexus.Web/Data/ApplicationDbContext.cs
+A	TradeNexus.Web/Models/Client.cs
+A	TradeNexus.Web/Models/SubBroker.cs
+A	TradeNexus.Web/Models/Trade.cs
