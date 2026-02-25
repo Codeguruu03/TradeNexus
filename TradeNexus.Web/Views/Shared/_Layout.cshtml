@@ -4,36 +4,662 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TradeNexus</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <style>
-        body { background-color: #f8f9fa; }
-        .navbar { background-color: #343a40; }
-        .navbar-brand { color: #fff !important; font-weight: bold; }
-        footer { margin-top: 50px; padding: 20px 0; border-top: 1px solid #dee2e6; }
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+            --warning-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --info-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            color: #e2e8f0;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.1), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(239, 68, 68, 0.08), transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(34, 197, 94, 0.08), transparent 50%);
+            z-index: -1;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        @@keyframes gradientShift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .content-wrapper {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            min-height: calc(100vh - 140px);
+            margin: 20px auto;
+            max-width: 1200px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            padding: 30px;
+            position: relative;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @@media (max-width: 1200px) {
+            .content-wrapper {
+                padding: 20px;
+                margin: 15px;
+            }
+        }
+
+        @@keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .navbar-brand {
+            color: #fff !important;
+            font-weight: 800;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+
+        .navbar-brand:hover {
+            transform: scale(1.05);
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+        }
+
+        .navbar-brand i {
+            margin-right: 15px;
+            font-size: 2.2rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @@keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .nav-link {
+            color: rgba(255,255,255,0.95) !important;
+            font-weight: 600;
+            margin: 0 15px;
+            padding: 10px 20px !important;
+            border-radius: 25px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.2);
+            transition: left 0.3s;
+        }
+
+        .nav-link:hover::before {
+            left: 100%;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: #e2e8f0;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .page-header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 150px;
+            height: 150px;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite reverse;
+        }
+
+        @@keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(180deg); }
+        }
+
+        .page-header h1 {
+            font-weight: 800;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            color: #e2e8f0;
+        }
+
+        .page-header p {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+            color: #94a3b8;
+        }
+
+        /* Stat Cards - Compact Metrics */
+        .stat-card {
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 0;
+            background: #1e293b;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .stat-card.primary::before { background: #667eea; }
+        .stat-card.success::before { background: #22c55e; }
+        .stat-card.warning::before { background: #f59e0b; }
+        .stat-card.danger::before { background: #ef4444; }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border-color: rgba(148, 163, 184, 0.2);
+        }
+
+        .stat-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+
+        .stat-card .icon {
+            display: none;
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 2px;
+            color: #e2e8f0;
+            position: relative;
+            z-index: 1;
+            line-height: 1.2;
+        }
+
+        .stat-card.primary h3 {
+            color: #818cf8;
+        }
+
+        .stat-card.success h3 {
+            color: #22c55e;
+        }
+
+        .stat-card.warning h3 {
+            color: #f59e0b;
+        }
+
+        .stat-card.danger h3 {
+            color: #ef4444;
+        }
+
+        .stat-card p {
+            color: #94a3b8;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0;
+        }
+
+        /* Data Table Wrapper */
+        .data-table-wrapper {
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            box-shadow: none;
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        .data-table-wrapper h4 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        @@keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Table Styling */
+        .table {
+            margin-bottom: 0;
+            border-collapse: separate;
+            border-spacing: 0 10px;
+        }
+
+        .table thead th {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            padding: 18px;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .table thead th:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        .table thead th:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        .table tbody tr {
+            background: white;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .table tbody tr:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+            background: linear-gradient(to right, #f8f9ff, white);
+        }
+
+        .table tbody td {
+            padding: 20px 18px;
+            vertical-align: middle;
+            border: none;
+            font-weight: 500;
+        }
+
+        .table tbody tr td:first-child {
+            border-radius: 15px 0 0 15px;
+        }
+
+        .table tbody tr td:last-child {
+            border-radius: 0 15px 15px 0;
+        }
+
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            padding: 12px 25px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: none;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+        }
+
+        .btn-info {
+            background: var(--info-gradient);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.8rem;
+        }
+
+        .btn-group .btn {
+            margin: 0 3px;
+        }
+
+        /* Badge Styling */
+        .badge {
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .bg-secondary {
+            background: var(--dark-gradient) !important;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            margin-top: 50px;
+            padding: 30px 0;
+            border-top: 3px solid transparent;
+            border-image: var(--primary-gradient);
+            border-image-slice: 1;
+            text-align: center;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+        }
+
+        footer p {
+            margin: 0;
+            font-weight: 600;
+        }
+
+        /* Modal Styling */
+        .modal-content {
+            border-radius: 25px;
+            border: none;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 25px 30px;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        /* DataTables Search */
+        .dataTables_wrapper .dataTables_filter input {
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .dataTables_wrapper .dataTables_filter input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+            outline: none;
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 9999;
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--dark-gradient);
+        }
+
+        /* Responsive */
+        @@media (max-width: 768px) {
+            .page-header h1 {
+                font-size: 2rem;
+            }
+            
+            .stat-card h3 {
+                font-size: 2rem;
+            }
+
+            .content-wrapper {
+                padding: 20px;
+                margin: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Trade" asp-action="Index">TradeNexus</a>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" asp-controller="Trade" asp-action="Index">
+                <i class="fas fa-chart-line"></i> TradeNexus
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Trade" asp-action="Index">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                            <i class="fas fa-info-circle"></i> About
+                        </a>
+                    </li>
+                </ul>
             </div>
-        </nav>
-    </header>
+        </div>
+    </nav>
+
     <div class="container">
-        <main role="main" class="pb-3">
+        <div class="content-wrapper animated">
             @RenderBody()
-        </main>
+        </div>
     </div>
 
-    <footer class="text-muted text-center">
+    <footer>
         <div class="container">
-            &copy; 2024 - TradeNexus - Brokerage Infrastructure Mgmt
+            <p class="mb-0">
+                <strong>TradeNexus</strong> - Multi-Tenant B2B Brokerage Infrastructure Management System
+                <br>
+                <small class="text-muted">&copy; 2026 All Rights Reserved</small>
+            </p>
         </div>
     </footer>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@@popperjs/core@@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- About Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-info-circle"></i> About TradeNexus</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>TradeNexus</strong> is an enterprise-grade Multi-Tenant B2B Brokerage Infrastructure Management System.</p>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="fas fa-check text-success"></i> Real-time Trade Management</li>
+                        <li><i class="fas fa-check text-success"></i> Advanced Risk Analysis Engine</li>
+                        <li><i class="fas fa-check text-success"></i> Multi-Broker Architecture</li>
+                        <li><i class="fas fa-check text-success"></i> Comprehensive Reporting</li>
+                        <li><i class="fas fa-check text-success"></i> Scalable Cloud Infrastructure</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="loading-spinner">
+        <div class="spinner-border text-primary" style="width: 4rem; height: 4rem;" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTables
+            if ($('.data-table').length) {
+                $('.data-table').DataTable({
+                    pageLength: 25,
+                    order: [[0, 'asc']],
+                    language: {
+                        search: "_INPUT_",
+                        searchPlaceholder: "Search records..."
+                    }
+                });
+            }
+
+            // Loading spinner for AJAX calls
+            $(document).on('click', '.btn-action', function() {
+                $('.loading-spinner').fadeIn();
+            });
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

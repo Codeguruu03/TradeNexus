@@ -23,7 +23,7 @@ namespace TradeNexus.Web
             services.AddControllersWithViews();
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlite(Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             // Register PythonRiskService for DI
             services.AddScoped<PythonRiskService>();
