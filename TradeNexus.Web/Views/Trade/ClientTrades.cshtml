@@ -143,7 +143,7 @@ else
     </div>
 
     <script>
-        function initCharts() {
+        window._initClientCharts = function() {
             var buyCount = @buyTrades;
             var sellCount = @sellTrades;
             
@@ -226,10 +226,8 @@ else
                     }
                 });
             }
-        }
+        };
 
-        $(document).ready(function() {
-            initCharts();
-        });
+        // Auto-call immediately since this partial is injected into an already-visible modal
+        window._initClientCharts();
     </script>
-}

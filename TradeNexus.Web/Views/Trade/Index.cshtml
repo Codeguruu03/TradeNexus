@@ -55,24 +55,24 @@
     </div>
 
     <!-- Row 2: Chart Containers -->
-    <div class="row">
-    <div class="col-lg-6">
+    <div class="row mb-3">
+    <div class="col-lg-6 mb-3">
         <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
             <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                <i class="fas fa-chart-area" style="color: #818cf8; margin-right: 6px;"></i>Exposure Trends
+                <i class="fas fa-chart-bar" style="color: #818cf8; margin-right: 6px;"></i>Exposure by Sub-Broker
             </h5>
-            <div style="display: flex; align-items: center; justify-content: center; height: calc(100% - 40px); color: #64748b; font-size: 0.85rem;">
-                <i class="fas fa-chart-line" style="font-size: 3rem; opacity: 0.2;"></i>
+            <div style="height: calc(100% - 40px); position: relative;">
+                <canvas id="exposureChart"></canvas>
             </div>
         </div>
     </div>
-    <div class="col-lg-6">
+    <div class="col-lg-6 mb-3">
         <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
             <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
                 <i class="fas fa-chart-pie" style="color: #22c55e; margin-right: 6px;"></i>Risk Distribution
             </h5>
-            <div style="display: flex; align-items: center; justify-content: center; height: calc(100% - 40px); color: #64748b; font-size: 0.85rem;">
-                <i class="fas fa-chart-pie" style="font-size: 3rem; opacity: 0.2;"></i>
+            <div style="height: calc(100% - 40px); position: relative;">
+                <canvas id="riskDistChart"></canvas>
             </div>
         </div>
     </div>
@@ -234,24 +234,117 @@
 
 @section Scripts {
     <script>
-        // Search Functionality
-        $('#clientSearch').on('keyup', function() {
-            let searchTerm = $(this).val().toLowerCase();
-            
-            if (searchTerm === '') {
-                $('.client-card').show();
-            } else {
-                $('.client-card').each(function() {
-                    let clientData = $(this).data('client').toLowerCase();
-                    if (clientData.includes(searchTerm)) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
+        // ─── Dashboard Charts ───────────────────────────────────────────
+
+        // Build chart data from Razor model
+        var subBrokerExposure = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            (Model ?? new List<TradeNexus.Web.Models.Trade>())
+                .GroupBy(t => t.SubBrokerCode)
+                .Select(g => new {
+                    label = g.Key ?? "Unknown",
+                    value = (double)g.Sum(t => t.Quantity * t.Price)
+                })
+                .OrderByDescending(x => x.value)
+                .Take(8)
+                .ToList()
+        ));
+
+        var riskCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+            (Model ?? new List<TradeNexus.Web.Models.Trade>())
+                .GroupBy(t => {
+                    var ep = t.MarginAvailable > 0 ? ((double)(t.Quantity * t.Price) / (double)t.MarginAvailable * 100) : 100;
+                    return ep > 80 ? "High" : ep > 50 ? "Medium" : "Safe";
+                })
+                .Select(g => new { label = g.Key, count = g.Count() })
+                .ToList()
+        ));
+
+        $(document).ready(function () {
+
+            // --- Exposure by Sub-Broker (Bar) ---
+            var ctxExp = document.getElementById('exposureChart');
+            if (ctxExp && subBrokerExposure.length > 0) {
+                new Chart(ctxExp, {
+                    type: 'bar',
+                    data: {
+                        labels: subBrokerExposure.map(d => d.label),
+                        datasets: [{
+                            label: 'Exposure (₹)',
+                            data: subBrokerExposure.map(d => d.value),
+                            backgroundColor: [
+                                'rgba(102,126,234,0.75)', 'rgba(34,197,94,0.75)',
+                                'rgba(239,68,68,0.75)',   'rgba(245,158,11,0.75)',
+                                'rgba(79,172,254,0.75)',  'rgba(240,147,251,0.75)',
+                                'rgba(56,239,125,0.75)', 'rgba(244,92,67,0.75)'
+                            ],
+                            borderColor: ['#818cf8','#22c55e','#ef4444','#f59e0b','#4facfe','#f093fb','#38ef7d','#f45c43'],
+                            borderWidth: 2,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => '₹' + ctx.parsed.y.toLocaleString('en-IN')
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(148,163,184,0.1)' } },
+                            y: { ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => '₹' + (v/100000).toFixed(0) + 'L' }, grid: { color: 'rgba(148,163,184,0.1)' } }
+                        }
                     }
                 });
             }
+
+            // --- Risk Distribution (Doughnut) ---
+            var ctxRisk = document.getElementById('riskDistChart');
+            if (ctxRisk && riskCounts.length > 0) {
+                var colorMap = { 'Safe': '#22c55e', 'Medium': '#f59e0b', 'High': '#ef4444' };
+                new Chart(ctxRisk, {
+                    type: 'doughnut',
+                    data: {
+                        labels: riskCounts.map(d => d.label),
+                        datasets: [{
+                            data: riskCounts.map(d => d.count),
+                            backgroundColor: riskCounts.map(d => colorMap[d.label] + 'cc'),
+                            borderColor:     riskCounts.map(d => colorMap[d.label]),
+                            borderWidth: 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { color: '#94a3b8', font: { weight: '600', size: 11 }, padding: 16, usePointStyle: true }
+                            }
+                        },
+                        cutout: '65%'
+                    }
+                });
+            }
+
+            // ─── Search Functionality ─────────────────────────────────────
+            $('#clientSearch').on('keyup', function() {
+                let searchTerm = $(this).val().toLowerCase();
+                if (searchTerm === '') {
+                    $('.client-card').show();
+                } else {
+                    $('.client-card').each(function() {
+                        let clientData = $(this).data('client').toLowerCase();
+                        $(this).toggle(clientData.includes(searchTerm));
+                    });
+                }
+            });
         });
 
+        // ─── Modal: View Trades ───────────────────────────────────────────
         function viewTrades(clientId, clientName, clientCode) {
             $('#modalClientName').text(clientName + ' (' + clientCode + ')');
             $('#tradesModal').modal('show');
@@ -265,18 +358,22 @@
 
             $.get('/Trade/ClientTrades?clientId=' + clientId, function(data) {
                 $('#tradesContent').html(data);
-                if (typeof initCharts === 'function') {
-                    initCharts();
-                }
+                // Charts in the partial need the DOM to be painted first
+                setTimeout(function() {
+                    if (typeof window._initClientCharts === 'function') {
+                        window._initClientCharts();
+                    }
+                }, 100);
             }).fail(function() {
                 $('#tradesContent').html(`
                     <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> Failed to load trades.
+                        <i class="fas fa-exclamation-circle"></i> Failed to load trade data. Check DB connection.
                     </div>
                 `);
             });
         }
 
+        // ─── Modal: Risk Analysis ─────────────────────────────────────────
         function analyzeRisk(clientId, clientName) {
             $('#riskClientName').text(clientName);
             $('#riskModal').modal('show');
@@ -284,7 +381,7 @@
             $('#riskContent').html(`
                 <div class="text-center py-5">
                     <div class="spinner-border text-warning" role="status"></div>
-                    <p class="mt-3">Analyzing risk metrics...</p>
+                    <p class="mt-3">Running Python risk engine...</p>
                 </div>
             `);
 
@@ -299,8 +396,24 @@
             });
         }
 
+        // ─── Export to CSV ────────────────────────────────────────────────
         function exportToExcel() {
-            alert('Export functionality - Coming Soon!');
+            var rows = [['Client Name', 'Client Code', 'Sub-Broker', 'City', 'State', 'Margin Available']];
+            $('.client-card:visible').each(function() {
+                var raw = $(this).data('client').split(' ');
+                // data-client = "ClientName ClientCode City State"
+                // We grab the header cells from cards
+                var name = $(this).find('h5').first().text().trim();
+                var badge = $(this).find('.badge').text().trim();
+                var margin = $(this).find('[style*="font-size: 1.4rem"]').text().trim();
+                rows.push([name, badge, '', '', '', margin]);
+            });
+            var csv = rows.map(r => r.map(c => '"' + c + '"').join(',')).join('\n');
+            var blob = new Blob([csv], { type: 'text/csv' });
+            var a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'TradeNexus_Clients_' + new Date().toISOString().slice(0,10) + '.csv';
+            a.click();
         }
 
         function printTable() {
@@ -308,9 +421,7 @@
         }
 
         // Auto-refresh every 5 minutes
-        setTimeout(function() {
-            location.reload();
-        }, 300000);
+        setTimeout(function() { location.reload(); }, 300000);
     </script>
 }
 
