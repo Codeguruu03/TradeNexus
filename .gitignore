@@ -72,3 +72,6 @@ build/
 
 ## macOS
 .DS_Store
+
+
+publish/
