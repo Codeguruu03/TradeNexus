@@ -6,7 +6,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using TradeNexus.Web.Data;
-using TradeNexus.Web.Helpers;
 using TradeNexus.Web.Services;
 
 namespace TradeNexus.Web
@@ -24,13 +23,19 @@ namespace TradeNexus.Web
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            var connectionString = Configuration.GetConnectionString("DefaultConnection");
+            var dbProvider = Configuration["DatabaseProvider"] ?? "SqlServer";
 
-            services.AddAuthentication("Basic")
-                .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
-
-            services.AddAuthorization();
+            if (dbProvider == "SQLite")
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlite(connectionString));
+            }
+            else
+            {
+                services.AddDbContext<ApplicationDbContext>(options =>
+                    options.UseSqlServer(connectionString));
+            }
 
             // Register PythonRiskService for DI
             services.AddScoped<PythonRiskService>();
@@ -53,7 +58,6 @@ namespace TradeNexus.Web
 
             app.UseRouting();
 
-            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
