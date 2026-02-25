@@ -123,14 +123,14 @@
             var pillClass = riskLevel == "high" ? "pill-high" : (riskLevel == "mid" ? "pill-mid" : "pill-safe");
             <div class="client-row"
                  data-risk="@riskLevel"
-                 data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PanCard?.ToLower() ?? "")">
+                 data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PAN?.ToLower() ?? "")">
                 <!-- Name col -->
                 <div>
                     <div class="cr-name">@(client.ClientName ?? "Unknown")</div>
                     <div class="cr-sub">
                         @if (!string.IsNullOrEmpty(client.City)) { <span>@client.City</span> }
                         @if (!string.IsNullOrEmpty(client.State)) { <span>&nbsp;/ @client.State</span> }
-                        @if (!string.IsNullOrEmpty(client.PanCard)) { <span>&nbsp;· @client.PanCard</span> }
+                        @if (!string.IsNullOrEmpty(client.PAN)) { <span>&nbsp;· @client.PAN</span> }
                     </div>
                 </div>
                 <!-- Risk pill -->
@@ -157,7 +157,7 @@
                 </div>
                 <!-- Sub-broker -->
                 <div>
-                    <div class="cr-val" style="font-size:0.78rem; color:#374151;">@(client.SubBrokerId ?? "—")</div>
+                    <div class="cr-val" style="font-size:0.78rem; color:#374151;">@(client.SubBrokerId > 0 ? client.SubBrokerId.ToString() : "—")</div>
                     @if (!string.IsNullOrEmpty(client.SubBrokerCode)) {
                         <div class="cr-meta">@client.SubBrokerCode</div>
                     }

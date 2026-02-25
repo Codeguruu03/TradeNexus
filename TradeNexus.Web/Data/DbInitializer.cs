@@ -8,11 +8,16 @@ namespace TradeNexus.Web.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
+            Console.WriteLine("Initializing SQLite database...");
             context.Database.EnsureCreated();
 
             if (context.Trades.Any())
-                return; // Already seeded
+            {
+                Console.WriteLine("Database already seeded.");
+                return;
+            }
 
+            Console.WriteLine("Seeding database with sample data...");
             var trades = new Trade[]
             {
                 // Client 1 — Rahul Sharma (Alpha Broking)
