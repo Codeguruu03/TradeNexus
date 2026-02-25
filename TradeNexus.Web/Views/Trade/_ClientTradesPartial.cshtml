@@ -1,0 +1,33 @@
+@model IEnumerable<TradeNexus.Web.Models.Trade>
+@using TradeNexus.Web.Helpers
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0" style="font-size: 0.85rem;">
+        <thead class="bg-light">
+            <tr>
+                <th class="ps-3">Date</th>
+                <th>Symbol</th>
+                <th>Type</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th class="text-end pe-3">Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var trade in Model.OrderByDescending(t => t.TradeDate))
+            {
+                <tr>
+                    <td class="ps-3"><small class="text-muted">@trade.TradeDate.ToString("dd-MMM-yy")</small></td>
+                    <td><strong>@trade.Symbol</strong><br><small class="text-muted">@trade.Exchange</small></td>
+                    <td>
+                        @if (trade.BuySell == "BUY") { <span class="badge bg-success-subtle text-success border border-success-subtle">BUY</span> }
+                        else { <span class="badge bg-danger-subtle text-danger border border-danger-subtle">SELL</span> }
+                    </td>
+                    <td>@trade.Quantity</td>
+                    <td>₹@trade.Price.ToString("N2")</td>
+                    <td class="text-end pe-3 font-monospace">@((trade.Quantity * trade.Price).ToIndianCurrency())</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

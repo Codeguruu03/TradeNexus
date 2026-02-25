@@ -1,0 +1,54 @@
+@model TradeNexus.Web.Models.Trade
+@using TradeNexus.Web.Helpers
+
+@if (Model == null) { <div class="p-4 text-center">Client details not found.</div> }
+else {
+<div class="p-4">
+    <div class="row g-4">
+        <!-- Profile Header -->
+        <div class="col-12">
+            <div class="d-flex align-items-center p-3 bg-light rounded-4">
+                <div class="avatar-circle bg-primary text-white fs-2 me-4 d-flex align-items-center justify-content-center" style="width:70px; height:70px; border-radius:50%; font-weight:700;">
+                    @Model.ClientName.Substring(0,1)
+                </div>
+                <div>
+                    <h4 class="mb-1 fw-bold text-dark">@Model.ClientName</h4>
+                    <p class="mb-0 text-muted">Client Code: <span class="fw-bold">@Model.ClientCode</span> | ID: @Model.ClientId</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadata -->
+        <div class="col-md-6">
+            <div class="bg-white p-3 rounded-4 border">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3"><i class="fas fa-id-card me-2"></i>Personal Info</h6>
+                <table class="table table-borderless table-sm mb-0">
+                    <tr><td class="text-muted w-50">PAN Number</td><td class="fw-bold text-dark">@Model.PAN</td></tr>
+                    <tr><td class="text-muted">City</td><td class="fw-bold text-dark">@Model.City</td></tr>
+                    <tr><td class="text-muted">State</td><td class="fw-bold text-dark">@Model.State</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="bg-white p-3 rounded-4 border">
+                <h6 class="text-uppercase small fw-bold text-muted mb-3"><i class="fas fa-shield-alt me-2"></i>Brokerage Info</h6>
+                <table class="table table-borderless table-sm mb-0">
+                    <tr><td class="text-muted w-50">Sub-Broker</td><td class="fw-bold text-dark">@Model.SubBrokerName</td></tr>
+                    <tr><td class="text-muted">Broker Code</td><td class="fw-bold text-dark">@Model.SubBrokerCode</td></tr>
+                    <tr><td class="text-muted">Margin Limit</td><td class="fw-bold text-primary">@Model.MarginAvailable.ToIndianCurrency()</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="alert alert-info border-0 rounded-4 d-flex align-items-center mb-0">
+                <i class="fas fa-info-circle fa-2x me-3"></i>
+                <div class="small">
+                    This profile displays the institutional master data recorded in the TradeNexus central repository. For trade modifications, please head to the <strong>Trade History</strong> window.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}

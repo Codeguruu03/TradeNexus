@@ -17,7 +17,7 @@
 <div class="row g-3 mb-4">
     <!-- Total Clients -->
     <div class="col-6 col-md-3">
-        <div class="kpi-card">
+        <div class="kpi-card" style="cursor: pointer;" onclick="loadClientsPopup('all')">
             <div class="kpi-card-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-users"></i></div>
             <div class="kpi-label">Total Clients</div>
             <div class="kpi-value" data-target="@totalClients">0</div>
@@ -26,7 +26,7 @@
     </div>
     <!-- Sub-Brokers -->
     <div class="col-6 col-md-3">
-        <div class="kpi-card">
+        <div class="kpi-card" style="cursor: pointer;" onclick="loadSubBrokersPopup()">
             <div class="kpi-card-icon" style="background:#f0fdf4; color:#16a34a;"><i class="fas fa-building"></i></div>
             <div class="kpi-label">Sub-Brokers</div>
             <div class="kpi-value" data-target="@subBrokers">0</div>
@@ -35,7 +35,7 @@
     </div>
     <!-- High Risk -->
     <div class="col-6 col-md-3">
-        <div class="kpi-card">
+        <div class="kpi-card" style="cursor: pointer;" onclick="loadClientsPopup('high')">
             <div class="kpi-card-icon" style="background:#fef2f2; color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div>
             <div class="kpi-label">High Risk</div>
             <div class="kpi-value" data-target="@highRiskCount" style="color:#dc2626;">0</div>
@@ -125,8 +125,8 @@
                  data-risk="@riskLevel"
                  data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PAN?.ToLower() ?? "")">
                 <!-- Name col -->
-                <div>
-                    <div class="cr-name">@(client.ClientName ?? "Unknown")</div>
+                <div style="cursor: pointer;" onclick="loadClientProfile('@client.ClientId')">
+                    <div class="cr-name text-primary">@(client.ClientName ?? "Unknown")</div>
                     <div class="cr-sub">
                         @if (!string.IsNullOrEmpty(client.City)) { <span>@client.City</span> }
                         @if (!string.IsNullOrEmpty(client.State)) { <span>&nbsp;/ @client.State</span> }
@@ -209,8 +209,23 @@
                 <h5 class="modal-title"><i class="fas fa-robot" style="color:#dc2626; margin-right:8px;"></i><span id="riskModalTitle">Risk Analysis</span></h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="riskModalContent" style="padding:20px; min-height:200px; background:white;">
-                <div class="text-center p-4"><div class="spinner-border text-danger" role="status"></div></div>
+            <div class="modal-body" id="riskModalContent" style="padding:0; min-height:200px; background:white;">
+                <div class="text-center p-5"><div class="spinner-border text-danger" role="status"></div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- General Info Modal (for Reports/Analytics) -->
+<div class="modal fade" id="generalModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#f8fafc;">
+                <h5 class="modal-title fw-bold" id="generalModalTitle">Information Overview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="generalModalContent" style="padding:0; min-height:200px; background:white;">
+                <div class="text-center p-5"><div class="spinner-border text-secondary" role="status"></div></div>
             </div>
         </div>
     </div>
@@ -289,6 +304,9 @@ setTimeout(function() {
                         }
                     }
                 },
+                layout: {
+                    padding: { bottom: 20 }
+                },
                 scales: {
                     y: {
                         grid: { color: '#f1f5f9' },
@@ -299,7 +317,12 @@ setTimeout(function() {
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { color: '#374151', font: { size: 10 } }
+                        ticks: { 
+                            color: '#374151', 
+                            font: { size: 10, weight: '600' },
+                            maxRotation: 0,
+                            minRotation: 0
+                        }
                     }
                 }
             }
@@ -385,19 +408,43 @@ function loadClientTrades(clientId, clientName) {
 function loadRiskData(clientId, clientName) {
     document.getElementById('riskModalTitle').textContent = clientName + ' – Risk Analysis';
     document.getElementById('riskModalContent').innerHTML =
-        '<div class="text-center p-4"><div class="spinner-border text-danger" role="status"></div></div>';
+        '<div class="text-center p-5"><div class="spinner-border text-danger" role="status"></div><p class="mt-2 text-muted">Running Python Risk Engine...</p></div>';
     new bootstrap.Modal(document.getElementById('riskModal')).show();
     fetch('/Trade/GetRiskAnalysis?clientId=' + encodeURIComponent(clientId))
         .then(function(r){ return r.text(); })
         .then(function(html) {
             document.getElementById('riskModalContent').innerHTML = html;
-            showToast('Risk analysis loaded', '#22c55e');
         })
         .catch(function() {
             document.getElementById('riskModalContent').innerHTML =
-                '<div class="text-center p-4" style="color:#dc2626;"><i class="fas fa-times-circle fa-2x"></i><p class="mt-2">Risk data unavailable</p></div>';
-            showToast('Risk data unavailable', '#ef4444');
+                '<div class="text-center p-5 text-danger"><i class="fas fa-times-circle fa-2x"></i><p class="mt-2">Risk engine failed</p></div>';
         });
+}
+
+// ── Generic Dynamic Modals (KPIs, Profile) ──
+function loadClientsPopup(type) {
+    var title = type === 'high' ? 'High Risk Client Report' : 'Consolidated Client List';
+    document.getElementById('generalModalTitle').textContent = title;
+    document.getElementById('generalModalContent').innerHTML = '<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div></div>';
+    new bootstrap.Modal(document.getElementById('generalModal')).show();
+    fetch('/Trade/GetClientsByType?type=' + type)
+        .then(function(r){ return r.text(); }).then(function(h){ document.getElementById('generalModalContent').innerHTML = h; });
+}
+
+function loadSubBrokersPopup() {
+    document.getElementById('generalModalTitle').textContent = 'Sub-Broker Network Overview';
+    document.getElementById('generalModalContent').innerHTML = '<div class="text-center p-5"><div class="spinner-border text-success" role="status"></div></div>';
+    new bootstrap.Modal(document.getElementById('generalModal')).show();
+    fetch('/Trade/GetSubBrokerList')
+        .then(function(r){ return r.text(); }).then(function(h){ document.getElementById('generalModalContent').innerHTML = h; });
+}
+
+function loadClientProfile(clientId) {
+    document.getElementById('generalModalTitle').textContent = 'Detailed Client Profile';
+    document.getElementById('generalModalContent').innerHTML = '<div class="text-center p-5"><div class="spinner-border text-info" role="status"></div></div>';
+    new bootstrap.Modal(document.getElementById('generalModal')).show();
+    fetch('/Trade/GetClientDetails?clientId=' + clientId)
+        .then(function(r){ return r.text(); }).then(function(h){ document.getElementById('generalModalContent').innerHTML = h; });
 }
 
 // ── Export CSV ──

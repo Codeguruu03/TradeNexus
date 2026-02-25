@@ -1,0 +1,33 @@
+@model string
+@using TradeNexus.Web.Helpers
+
+<div class="p-4">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <h5 class="mb-0 fw-bold">Python Risk Engine Output</h5>
+        <div class="badge bg-primary">v2.4 Live AI</div>
+    </div>
+
+    @if (string.IsNullOrEmpty(Model))
+    {
+        <div class="text-center p-5">
+            <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+            <p class="text-muted">Calculating risk metrics...</p>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm mb-4" style="background: #f8fafc; border-radius: 12px;">
+            <div class="card-body">
+                <pre class="mb-0" style="font-family: 'Fira Code', monospace; font-size: 0.9rem; color: #334155; white-space: pre-wrap;">@Model</pre>
+            </div>
+        </div>
+
+        <div class="alert @(Model.ToLower().Contains("high") ? "alert-danger" : "alert-success") border-0 shadow-sm d-flex align-items-center" style="border-radius: 12px;">
+            <i class="fas @(Model.ToLower().Contains("high") ? "fa-exclamation-triangle" : "fa-check-circle") fa-2x me-3"></i>
+            <div>
+                <h6 class="alert-heading fw-bold mb-1">Final Risk Verdict</h6>
+                <p class="mb-0 small">Based on margin availability and current volatility, this client is classified as <strong>@(Model.ToLower().Contains("high") ? "HIGH RISK" : "SAFE")</strong>.</p>
+            </div>
+        </div>
+    }
+</div>

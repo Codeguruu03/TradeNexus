@@ -33,67 +33,71 @@ namespace TradeNexus.Web.Controllers
             return View(uniqueClients);
         }
 
-        public async Task<IActionResult> ClientTrades(int clientId)
+        public async Task<IActionResult> GetClientTrades(int clientId)
         {
-            var clientTrades = await _context.Trades
+            var trades = await _context.Trades
                 .Where(t => t.ClientId == clientId)
                 .OrderByDescending(t => t.TradeDate)
                 .ToListAsync();
-
-            if (clientTrades == null || clientTrades.Count == 0)
-            {
-                ViewBag.Message = "No trades found for this client.";
-                return View(new List<Trade>());
-            }
-
-            ViewBag.ClientName = clientTrades.FirstOrDefault()?.ClientName;
-            ViewBag.ClientCode = clientTrades.FirstOrDefault()?.ClientCode;
-            ViewBag.TotalTrades = clientTrades.Count;
-
-            return View(clientTrades);
+            return PartialView("_ClientTradesPartial", trades);
         }
 
-        public async Task<IActionResult> CalculateRisk(int clientId)
+        public async Task<IActionResult> GetRiskAnalysis(int clientId)
         {
             var trades = await _context.Trades
                 .Where(t => t.ClientId == clientId)
                 .ToListAsync();
 
             if (trades == null || trades.Count == 0)
-            {
-                ViewBag.Message = "No trades found for this client.";
-                ViewBag.ClientId = clientId;
-                return View("RiskResult");
-            }
+                return Content("<div class='p-3 text-center'>No trades found for risk analysis.</div>");
 
             var clientInfo = trades.FirstOrDefault();
-            var availableMargin = clientInfo?.MarginAvailable ?? 500000;
-
-            // Prepare trade data for Python risk engine
-            var tradeList = trades.Select(t => new 
-            { 
-                quantity = t.Quantity, 
-                price = t.Price,
-                symbol = t.Symbol,
-                buySell = t.BuySell
-            }).ToList();
-
-            var input = new
-            {
-                trades = tradeList,
-                availableMargin = availableMargin
-            };
-
+            var tradeList = trades.Select(t => new { quantity = t.Quantity, price = (double)t.Price, symbol = t.Symbol, buySell = t.BuySell }).ToList();
+            
+            var input = new { trades = tradeList, availableMargin = (double)(clientInfo?.MarginAvailable ?? 500000) };
             string jsonInput = JsonConvert.SerializeObject(input);
-            var result = _riskService.ExecuteRiskEngine(jsonInput);
+            var riskData = _riskService.ExecuteRiskEngine(jsonInput);
 
-            ViewBag.RiskResult = result;
-            ViewBag.ClientId = clientId;
             ViewBag.ClientName = clientInfo?.ClientName;
-            ViewBag.TradeCount = trades.Count;
             ViewBag.TotalExposure = trades.Sum(t => t.Quantity * t.Price);
+            
+            return PartialView("_RiskAnalysisPartial", riskData);
+        }
 
-            return View("RiskResult");
+        public async Task<IActionResult> GetSubBrokerList()
+        {
+            var trades = await _context.Trades.ToListAsync();
+            var subBrokers = trades
+                .GroupBy(t => t.SubBrokerId)
+                .Select(g => new { 
+                    Id = g.Key, 
+                    Name = g.First().SubBrokerName, 
+                    Code = g.First().SubBrokerCode,
+                    ClientCount = g.Select(x => x.ClientId).Distinct().Count(),
+                    TotalExposure = g.Sum(x => x.Quantity * x.Price)
+                }).ToList();
+
+            return PartialView("_SubBrokersPartial", subBrokers);
+        }
+
+        public async Task<IActionResult> GetClientDetails(int clientId)
+        {
+            var clientTrade = await _context.Trades.FirstOrDefaultAsync(t => t.ClientId == clientId);
+            return PartialView("_ClientDetailsPartial", clientTrade);
+        }
+
+        public async Task<IActionResult> GetClientsByType(string type)
+        {
+            var trades = await _context.Trades.ToListAsync();
+            var clients = trades.GroupBy(t => t.ClientId).Select(g => g.First());
+
+            if (type == "high")
+            {
+                clients = clients.Where(c => c.MarginAvailable > 0 && ((decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100) > 80);
+            }
+
+            ViewBag.ListTitle = type == "high" ? "High Risk Clients" : "All Registered Clients";
+            return PartialView("_ClientsListPartial", clients.ToList());
         }
     }
 }

@@ -1,0 +1,45 @@
+@model IEnumerable<TradeNexus.Web.Models.Trade>
+@using TradeNexus.Web.Helpers
+
+<div class="px-3 pb-3">
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h6 class="fw-bold text-uppercase small text-muted mb-0">@ViewBag.ListTitle</h6>
+        <span class="badge bg-dark rounded-pill">@Model.Count() records</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" style="font-size: 0.85rem;">
+            <thead class="bg-light">
+                <tr>
+                    <th class="ps-3 border-0">Client Name</th>
+                    <th class="border-0">PAN / Code</th>
+                    <th class="border-0">Location</th>
+                    <th class="border-0">Margin</th>
+                    <th class="text-end pe-3 border-0">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var client in Model)
+                {
+                    <tr>
+                        <td class="ps-3">
+                            <span class="fw-bold text-dark">@client.ClientName</span>
+                            <br><small class="text-muted">Sub-Broker: @client.SubBrokerName</small>
+                        </td>
+                        <td>
+                            <code class="small text-primary">@client.PAN</code>
+                            <br><small class="text-muted">@client.ClientCode</small>
+                        </td>
+                        <td><small>@client.City, @client.State</small></td>
+                        <td class="font-monospace fw-bold">@client.MarginAvailable.ToIndianCurrency()</td>
+                        <td class="text-end pe-3">
+                            <button class="btn btn-sm btn-outline-primary py-1 px-3 border-0 bg-light" onclick="loadClientProfile(@client.ClientId)">
+                                View Profile
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
