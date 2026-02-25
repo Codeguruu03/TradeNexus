@@ -1,16 +1,11 @@
-## Ignore build outputs
+## .NET / ASP.NET Core
 bin/
 obj/
-publish/
-*.db
-*.db-shm
-*.db-wal
-
-## Visual Studio user-specific files
-*.suo
 *.user
-*.userosscache
-*.sln.docstates
+*.suo
+*.vs/
+.vs/
+*.userprefs
 
 ## Build results
 [Dd]ebug/
@@ -20,24 +15,60 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-
-## .NET Core
-project.lock.json
-project.fragment.lock.json
-artifacts/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
 
 ## NuGet Packages
 *.nupkg
 *.snupkg
 **/packages/*
+!**/packages/build/
+*.lock.json
 
-## Visual Studio cache/options
+## Project properties / secrets
+launchSettings.json
+appsettings.Development.json
+**/Properties/launchSettings.json
+
+## Visual Studio
 .vs/
-.vscode/
+*.rsuser
+*.sln.docstates
+*.VC.db
+*.VC.opendb
+*.pidb
+*.svclog
+*.scc
+_ReSharper*/
+*.dotCover
+*.DotSettings.user
+*.jmconfig
+*.bak
+*.orig
+*.tmp
 
-## Rider
-.idea/
-
-## OS generated files
-.DS_Store
+## Windows
 Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pdb
+.Python
+env/
+venv/
+*.egg-info/
+dist/
+build/
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## macOS
+.DS_Store
