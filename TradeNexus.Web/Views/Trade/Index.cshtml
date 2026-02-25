@@ -25,29 +25,29 @@
     </div>
 </div>
 
-<div class="container mt-4">
+<div class="container-fluid mt-4">
     <!-- Row 1: KPI Cards -->
-    <div class="row">
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="stat-card primary p-3" style="max-height: 180px;">
+    <div class="row g-3">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card primary p-3">
                 <h3>@totalClients</h3>
                 <p>Clients</p>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="stat-card success p-3" style="max-height: 180px;">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card success p-3">
                 <h3>@totalMargin.ToIndianCurrency()</h3>
                 <p>Total Margin</p>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="stat-card warning p-3" style="max-height: 180px;">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card warning p-3">
                 <h3>@avgMargin.ToIndianCurrency()</h3>
                 <p>Avg/Client</p>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6 mb-3">
-            <div class="stat-card danger p-3" style="max-height: 180px;">
+        <div class="col-lg-3 col-md-6">
+            <div class="stat-card danger p-3">
                 <h3>@subBrokers</h3>
                 <p>Sub-Brokers</p>
             </div>
@@ -55,36 +55,36 @@
     </div>
 
     <!-- Row 2: Chart Containers -->
-    <div class="row mb-3">
-    <div class="col-lg-6 mb-3">
-        <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
-            <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                <i class="fas fa-chart-bar" style="color: #818cf8; margin-right: 6px;"></i>Exposure by Sub-Broker
-            </h5>
-            <div style="height: calc(100% - 40px); position: relative;">
-                <canvas id="exposureChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="col-lg-6 mb-3">
-        <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
-            <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
-                <i class="fas fa-chart-pie" style="color: #22c55e; margin-right: 6px;"></i>Risk Distribution
-            </h5>
-            <div style="height: calc(100% - 40px); position: relative;">
-                <canvas id="riskDistChart"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-    <!-- Row 3: Client Portfolio -->
-    <div class="row">
-        <div class="col-12 mb-3">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <div>
-                    <h4 class="mb-0" style="font-size: 0.9rem; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-users-cog" style="font-size: 0.85rem; color: #818cf8; margin-right: 6px;"></i>Client Portfolio</h4>
+    <div class="row g-3 mt-2">
+        <div class="col-lg-6">
+            <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
+                <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <i class="fas fa-chart-bar" style="color: #818cf8; margin-right: 6px;"></i>Exposure by Sub-Broker
+                </h5>
+                <div style="height: calc(100% - 40px); position: relative;">
+                    <canvas id="exposureChart"></canvas>
                 </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div style="background: #1e293b; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.3); border: 1px solid rgba(148, 163, 184, 0.1); height: 280px;">
+                <h5 style="color: #e2e8f0; font-size: 0.9rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px;">
+                    <i class="fas fa-chart-pie" style="color: #22c55e; margin-right: 6px;"></i>Risk Distribution
+                </h5>
+                <div style="height: calc(100% - 40px); position: relative;">
+                    <canvas id="riskDistChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Portfolio Header & Search -->
+    <div class="row g-3 mt-3">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 style="font-size: 0.9rem; font-weight: 700; color: #e2e8f0; text-transform: uppercase; letter-spacing: 0.5px; margin: 0;">
+                    <i class="fas fa-users-cog" style="font-size: 0.85rem; color: #818cf8; margin-right: 6px;"></i>Client Portfolio
+                </h4>
                 <div class="btn-group">
                     <button class="btn btn-sm btn-primary" onclick="exportToExcel()" style="font-size: 0.7rem; padding: 5px 10px; background: #667eea; border: none;">
                         <i class="fas fa-file-excel"></i> Export
@@ -94,23 +94,20 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Search & Filter -->
-            <div class="mb-3">
-                <div class="input-group" style="max-width: 400px;">
-                    <span class="input-group-text" style="background: #1e293b; border: 1px solid rgba(148, 163, 184, 0.2); border-right: none; border-radius: 8px 0 0 8px; padding: 6px 10px;">
-                        <i class="fas fa-search" style="color: #818cf8; font-size: 0.85rem;"></i>
-                    </span>
-                    <input type="text" class="form-control" id="clientSearch" placeholder="Search clients..." 
-                           style="background: #1e293b; border: 1px solid rgba(148, 163, 184, 0.2); border-left: none; border-radius: 0 8px 8px 0; padding: 6px 10px; font-weight: 500; font-size: 0.8rem; color: #e2e8f0;">
-                </div>
+            <div class="input-group" style="max-width: 400px;">
+                <span class="input-group-text" style="background: #1e293b; border: 1px solid rgba(148, 163, 184, 0.2); border-right: none; border-radius: 8px 0 0 8px; padding: 6px 10px;">
+                    <i class="fas fa-search" style="color: #818cf8; font-size: 0.85rem;"></i>
+                </span>
+                <input type="text" class="form-control" id="clientSearch" placeholder="Search clients..." 
+                       style="background: #1e293b; border: 1px solid rgba(148, 163, 184, 0.2); border-left: none; border-radius: 0 8px 8px 0; padding: 6px 10px; font-weight: 500; font-size: 0.8rem; color: #e2e8f0;">
             </div>
         </div>
     </div>
 
+    <!-- Row 3: Client Cards Grid -->
     @if (Model == null || !Model.Any())
     {
-        <div class="row">
+        <div class="row g-3 mt-2">
             <div class="col-12">
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
@@ -121,28 +118,23 @@
     }
     else
     {
-        // Sort clients by risk level (highest risk first)
         var sortedClients = clients.OrderByDescending(c => (c.Quantity * c.Price) / c.MarginAvailable * 100).ToList();
         
-        <div class="row" id="clientCardsContainer">
-                    @foreach (var item in sortedClients)
-                    {
-                        var riskLevel = item.MarginAvailable > 0 ? "Low" : "High";
-                        var riskColor = riskLevel == "Low" ? "success" : "danger";
-                        var exposurePercent = ((item.Quantity * item.Price) / item.MarginAvailable * 100);
-                        if (exposurePercent > 100) exposurePercent = 100;
-                        
-                        // Determine risk category
-                        var riskCategory = exposurePercent > 80 ? "HIGH RISK" : exposurePercent > 50 ? "WATCHLIST" : "SAFE";
-                        var riskBadgeColor = exposurePercent > 80 ? "#ef4444" : exposurePercent > 50 ? "#f59e0b" : "#22c55e";
-                        var riskBadgeBg = exposurePercent > 80 ? "#7f1d1d" : exposurePercent > 50 ? "#78350f" : "#14532d";
-                        var cardBorderColor = exposurePercent > 80 ? "#ef4444" : exposurePercent > 50 ? "#f59e0b" : "#22c55e";
+        <div class="row g-3 mt-1" id="clientCardsContainer">
+            @foreach (var item in sortedClients)
+            {
+                var exposurePercent = ((item.Quantity * item.Price) / item.MarginAvailable * 100);
+                if (exposurePercent > 100) exposurePercent = 100;
+                
+                var riskCategory = exposurePercent > 80 ? "HIGH RISK" : exposurePercent > 50 ? "WATCHLIST" : "SAFE";
+                var riskBadgeColor = exposurePercent > 80 ? "#ef4444" : exposurePercent > 50 ? "#f59e0b" : "#22c55e";
+                var riskBadgeBg = exposurePercent > 80 ? "#7f1d1d" : exposurePercent > 50 ? "#78350f" : "#14532d";
+                var cardBorderColor = exposurePercent > 80 ? "#ef4444" : exposurePercent > 50 ? "#f59e0b" : "#22c55e";
 
-            <div class="col-lg-4 col-md-6 mb-3 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
-                <div class="card" style="border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-left: 3px solid @cardBorderColor; box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: all 0.3s; background: #1e293b; max-height: 180px;"
-                     onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.5)'"
-                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)'">
-                    <div class="card-body p-3">
+                <div class="col-lg-4 col-md-6 client-card" data-client="@item.ClientName @item.ClientCode @item.City @item.State">
+                    <div class="card p-3" style="border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.2); border-left: 3px solid @cardBorderColor; box-shadow: 0 2px 10px rgba(0,0,0,0.3); transition: all 0.3s; background: #1e293b;"
+                         onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 5px 20px rgba(0,0,0,0.5)'"
+                         onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 10px rgba(0,0,0,0.3)'">
                         <!-- Top Row: Client Name | Risk Badge -->
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="mb-0" style="font-weight: 700; color: #e2e8f0; font-size: 0.85rem;">@item.ClientName</h5>
@@ -151,14 +143,14 @@
                             </span>
                         </div>
 
-                        <!-- Second Row: Margin Available (Large Text) -->
+                        <!-- Margin Available (Large Text) -->
                         <div style="text-align: center; margin-bottom: 8px;">
                             <div style="font-size: 1.4rem; font-weight: 900; color: @(item.MarginAvailable >= 500000 ? "#22c55e" : item.MarginAvailable >= 200000 ? "#f59e0b" : "#ef4444"); line-height: 1; font-family: 'Poppins', sans-serif;">
                                 @item.MarginAvailable.ToIndianCurrency()
                             </div>
                         </div>
 
-                        <!-- Third Row: Utilization Bar -->
+                        <!-- Utilization Bar -->
                         <div style="margin-bottom: 8px;">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <small style="font-size: 0.6rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3px;">Utilization</small>
@@ -169,7 +161,7 @@
                             </div>
                         </div>
 
-                        <!-- Bottom Row: Small Buttons -->
+                        <!-- Buttons -->
                         <div class="d-flex gap-2">
                             <button type="button" class="btn" style="flex: 1; border-radius: 5px; font-weight: 600; padding: 5px; font-size: 0.65rem; background: #667eea; color: white; border: none;"
                                     onclick="viewTrades(@item.ClientId, '@item.ClientName', '@item.ClientCode')">
@@ -182,7 +174,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
             }
         </div>
     }
