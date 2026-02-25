@@ -2,437 +2,280 @@
 @using TradeNexus.Web.Helpers
 @{
     ViewData["Title"] = "Trade Dashboard";
-    var clients = Model?.GroupBy(m => m.ClientId).Select(g => g.First()).ToList() ?? new List<TradeNexus.Web.Models.Trade>();
-    var totalClients   = clients.Count();
-    var totalMargin    = clients.Sum(c => c.MarginAvailable);
-    var avgMargin      = totalClients > 0 ? totalMargin / totalClients : 0;
-    var subBrokers     = clients.Select(c => c.SubBrokerId).Distinct().Count();
-    var highRiskCount  = clients.Count(c => c.MarginAvailable > 0 && ((decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100) > 80);
-    var totalExposure  = Model?.Sum(m => (decimal)(m.Quantity * m.Price)) ?? 0;
+    var clients       = Model?.GroupBy(m => m.ClientId).Select(g => g.First()).ToList() ?? new List<TradeNexus.Web.Models.Trade>();
+    var totalClients  = clients.Count();
+    var totalMargin   = clients.Sum(c => c.MarginAvailable);
+    var avgMargin     = totalClients > 0 ? totalMargin / totalClients : 0;
+    var subBrokers    = clients.Select(c => c.SubBrokerId).Distinct().Count();
+    var highRiskCount = clients.Count(c => c.MarginAvailable > 0 && ((decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100) > 80);
+    var midRiskCount  = clients.Count(c => c.MarginAvailable > 0 && ((decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100) is > 50 and <= 80);
+    var safeCount     = clients.Count(c => !(c.MarginAvailable > 0 && ((decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100) > 50));
+    var totalExposure = Model?.Sum(m => (decimal)(m.Quantity * m.Price)) ?? 0;
 }
 
-<style>
-/* ════════════════════════════════════════════════════
-   PREMIUM DASHBOARD — INTERACTIVE STYLES
-════════════════════════════════════════════════════ */
-.content-wrapper { max-width:100% !important; margin:10px 16px !important; padding:20px 24px !important; }
-
-/* ── Animated Counter ── */
-@@keyframes countUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-.kpi-value { animation: countUp 0.6s ease-out forwards; }
-
-/* ── KPI Cards ── */
-.kpi-card {
-    background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.8));
-    border-radius: 16px; padding: 20px;
-    border: 1px solid rgba(148,163,184,0.12);
-    box-shadow: 0 4px 24px rgba(0,0,0,0.35);
-    position: relative; overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-    cursor: default;
-}
-.kpi-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
-.kpi-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; border-radius:16px 16px 0 0; }
-.kpi-card::after  { content:''; position:absolute; bottom:-20px; right:-20px; width:80px; height:80px; border-radius:50%; opacity:0.07; }
-.kpi-blue::before  { background: linear-gradient(90deg,#667eea,#764ba2); }
-.kpi-blue::after   { background: #667eea; }
-.kpi-green::before { background: linear-gradient(90deg,#11998e,#38ef7d); }
-.kpi-green::after  { background: #11998e; }
-.kpi-amber::before { background: linear-gradient(90deg,#f093fb,#f5576c); }
-.kpi-amber::after  { background: #f093fb; }
-.kpi-red::before   { background: linear-gradient(90deg,#eb3349,#f45c43); }
-.kpi-red::after    { background: #eb3349; }
-
-.kpi-icon { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; margin-bottom:12px; }
-.icon-blue  { background:rgba(102,126,234,0.15); color:#818cf8; }
-.icon-green { background:rgba(17,153,142,0.15);  color:#34d399; }
-.icon-amber { background:rgba(240,147,251,0.15); color:#f093fb; }
-.icon-red   { background:rgba(235,51,73,0.15);   color:#f87171; }
-.kpi-number { font-size:1.7rem; font-weight:900; color:#f1f5f9; font-family:'Poppins',sans-serif; line-height:1; margin-bottom:4px; }
-.kpi-label  { font-size:0.7rem; color:#94a3b8; text-transform:uppercase; letter-spacing:0.8px; font-weight:600; }
-.kpi-sub    { font-size:0.65rem; color:#64748b; margin-top:6px; }
-
-/* ── Chart Panels ── */
-.chart-panel {
-    background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(15,23,42,0.8));
-    border-radius:16px; padding:18px;
-    border:1px solid rgba(148,163,184,0.1);
-    box-shadow:0 4px 24px rgba(0,0,0,0.3); height:300px;
-}
-.chart-title { font-size:0.75rem; font-weight:700; color:#cbd5e1; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:12px; display:flex; align-items:center; gap:8px; }
-.chart-icon  { width:26px; height:26px; border-radius:7px; display:inline-flex; align-items:center; justify-content:center; font-size:0.7rem; }
-
-/* ── Risk Filter Tabs ── */
-.filter-tabs { display:flex; gap:8px; flex-wrap:wrap; }
-.filter-tab {
-    padding:6px 16px; border-radius:20px; font-size:0.72rem; font-weight:700;
-    border:1px solid transparent; cursor:pointer; transition:all 0.2s; letter-spacing:0.3px;
-}
-.filter-tab.active-all    { background:rgba(129,140,248,0.2); color:#818cf8; border-color:rgba(129,140,248,0.4); }
-.filter-tab.active-high   { background:rgba(239,68,68,0.2);  color:#ef4444; border-color:rgba(239,68,68,0.4); }
-.filter-tab.active-mid    { background:rgba(245,158,11,0.2); color:#f59e0b; border-color:rgba(245,158,11,0.4); }
-.filter-tab.active-safe   { background:rgba(34,197,94,0.2);  color:#22c55e; border-color:rgba(34,197,94,0.4); }
-.filter-tab:not(.active-all):not(.active-high):not(.active-mid):not(.active-safe) {
-    background:rgba(148,163,184,0.08); color:#64748b; border-color:rgba(148,163,184,0.15);
-}
-.filter-tab:hover { transform:translateY(-1px); opacity:0.85; }
-
-/* ── Client Cards ── */
-.client-card-body {
-    background: linear-gradient(145deg, rgba(30,41,59,0.95), rgba(20,30,48,0.9));
-    border-radius:14px; padding:16px;
-    border:1px solid rgba(148,163,184,0.1);
-    border-top-width: 3px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.25);
-    transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
-    position:relative; overflow:hidden; height:100%;
-}
-.client-card-body:hover { transform:translateY(-5px); box-shadow:0 18px 40px rgba(0,0,0,0.55); border-bottom-color:rgba(148,163,184,0.2); }
-.client-card-body::after { content:''; position:absolute; top:0; right:0; width:70px; height:70px; border-radius:0 14px 0 70px; opacity:0.05; }
-
-.risk-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:0.58rem; font-weight:800; letter-spacing:0.5px; white-space:nowrap; }
-.client-name { font-size:0.88rem; font-weight:700; color:#f1f5f9; line-height:1.2; }
-.client-sub  { font-size:0.65rem; color:#64748b; margin-top:2px; }
-.client-meta { display:flex; gap:8px; flex-wrap:wrap; margin:8px 0; }
-.meta-chip   { font-size:0.62rem; color:#94a3b8; background:rgba(148,163,184,0.08); padding:2px 8px; border-radius:10px; display:flex; align-items:center; gap:4px; }
-.margin-box  { background:rgba(15,23,42,0.6); border-radius:10px; padding:10px; text-align:center; margin:8px 0; }
-.margin-num  { font-size:1.4rem; font-weight:900; font-family:'Poppins',sans-serif; line-height:1; }
-.margin-lbl  { font-size:0.58rem; color:#64748b; text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
-.util-track  { height:6px; border-radius:6px; background:rgba(15,23,42,0.8); overflow:hidden; margin-top:6px; }
-.util-fill   { height:100%; border-radius:6px; transition: width 1s ease; }
-.card-btn    { flex:1; padding:8px 0; border-radius:9px; font-size:0.68rem; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; justify-content:center; gap:5px; letter-spacing:0.3px; }
-.btn-view    { background:rgba(102,126,234,0.12); color:#818cf8; border:1px solid rgba(102,126,234,0.25); }
-.btn-view:hover { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; box-shadow:0 4px 15px rgba(102,126,234,0.4); }
-.btn-risk    { background:rgba(239,68,68,0.1); color:#f87171; border:1px solid rgba(239,68,68,0.2); }
-.btn-risk:hover { background:linear-gradient(135deg,#eb3349,#f45c43); color:#fff; box-shadow:0 4px 15px rgba(235,51,73,0.4); }
-
-/* ── Skeleton loader ── */
-@@keyframes shimmer { 0%{background-position:-400px 0} 100%{background-position:400px 0} }
-.skeleton { background:linear-gradient(90deg,rgba(30,41,59,0.8) 25%,rgba(51,65,85,0.8) 50%,rgba(30,41,59,0.8) 75%); background-size:800px 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
-
-/* ── Toast ── */
-.tn-toast {
-    position:fixed; bottom:24px; right:24px; z-index:9999;
-    background:rgba(15,23,42,0.95); border:1px solid rgba(148,163,184,0.2);
-    border-radius:12px; padding:14px 20px; font-size:0.8rem; color:#e2e8f0;
-    box-shadow:0 8px 32px rgba(0,0,0,0.5); backdrop-filter:blur(10px);
-    display:flex; align-items:center; gap:10px;
-    transform:translateX(120%); transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
-    max-width:320px;
-}
-.tn-toast.show { transform:translateX(0); }
-
-/* ── Search ── */
-.tn-search { background:rgba(15,23,42,0.7) !important; border:1px solid rgba(148,163,184,0.15) !important; color:#e2e8f0 !important; border-radius:10px !important; padding:8px 14px 8px 36px !important; font-size:0.8rem !important; transition:border-color 0.2s !important; }
-.tn-search:focus { border-color:rgba(129,140,248,0.5) !important; box-shadow:0 0 0 3px rgba(129,140,248,0.1) !important; outline:none !important; }
-.tn-search::placeholder { color:#475569 !important; }
-
-/* ── Modals ── */
-.modal-content { background:rgba(10,18,35,0.98); border:1px solid rgba(148,163,184,0.15); border-radius:18px; backdrop-filter:blur(20px); }
-.modal-header  { border-bottom:1px solid rgba(148,163,184,0.1); padding:18px 24px; border-radius:18px 18px 0 0; }
-.trade-modal-header { background:linear-gradient(135deg, rgba(102,126,234,0.15) 0%, rgba(118,75,162,0.1) 100%); }
-.risk-modal-header  { background:linear-gradient(135deg, rgba(239,68,68,0.15)  0%, rgba(245,158,11,0.08) 100%); }
-.modal-title   { font-size:0.88rem; font-weight:700; color:#e2e8f0; }
-
-/* ── Section header ── */
-.section-bar { display:flex; justify-content:space-between; align-items:center; padding:14px 0 12px; border-bottom:1px solid rgba(148,163,184,0.08); margin-bottom:16px; }
-.section-title { font-size:0.8rem; font-weight:700; color:#e2e8f0; text-transform:uppercase; letter-spacing:1px; }
-
-/* ── Live dot ── */
-@@keyframes livePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
-.live-dot { display:inline-block; width:7px; height:7px; background:#22c55e; border-radius:50%; animation:livePulse 2s ease-in-out infinite; margin-right:4px; vertical-align:middle; }
-
-/* ── Responsive fix ── */
-@@media(max-width:768px) { .content-wrapper { margin:8px !important; padding:14px !important; } }
-</style>
-
-<!-- Toast -->
-<div class="tn-toast" id="tnToast"><span id="tnToastIcon"></span><span id="tnToastMsg"></span></div>
-
-<!-- ── Header ── -->
-<div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0 18px; flex-wrap:wrap; gap:10px;">
-    <div>
-        <h1 style="margin:0; font-size:1.55rem; font-weight:800; color:#f1f5f9; display:flex; align-items:center; gap:10px;">
-            <span style="background:linear-gradient(135deg,#667eea,#764ba2); border-radius:10px; width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center;">
-                <i class="fas fa-chart-line" style="color:white; font-size:0.9rem;"></i>
-            </span>
-            TradeNexus Dashboard
-        </h1>
-        <p style="margin:4px 0 0 46px; font-size:0.72rem; color:#64748b;">Real-time Portfolio &amp; Risk Management System</p>
-    </div>
-    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-        <span style="font-size:0.72rem; color:#64748b; font-family:'Poppins',monospace;" id="liveClock">--:--:--</span>
-        <span style="font-size:0.65rem; background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.25); padding:4px 10px; border-radius:20px; font-weight:700;">
-            <span class="live-dot"></span>LIVE
-        </span>
-        <button onclick="location.reload()" title="Refresh" style="background:rgba(129,140,248,0.1); border:1px solid rgba(129,140,248,0.2); color:#818cf8; border-radius:8px; padding:6px 14px; font-size:0.72rem; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(129,140,248,0.2)'" onmouseout="this.style.background='rgba(129,140,248,0.1)'">
-            <i class="fas fa-sync-alt"></i> Refresh
-        </button>
-    </div>
-</div>
-
-<!-- ── KPI Cards ── -->
-<div class="row g-3 mb-3">
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="kpi-card kpi-blue h-100">
-            <div class="kpi-icon icon-blue"><i class="fas fa-users"></i></div>
-            <div class="kpi-number" data-target="@totalClients" data-format="number">0</div>
+<!-- ══════════════ KPI STRIP ══════════════ -->
+<div class="row g-3 mb-4">
+    <!-- Total Clients -->
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-card-icon" style="background:#eff6ff; color:#2563eb;"><i class="fas fa-users"></i></div>
             <div class="kpi-label">Total Clients</div>
-            <div class="kpi-sub"><i class="fas fa-fire" style="color:#f87171;"></i> @highRiskCount High Risk</div>
+            <div class="kpi-value" data-target="@totalClients">0</div>
+            <div class="kpi-sub"><span style="color:#22c55e; font-weight:700;">●</span> @highRiskCount high risk</div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="kpi-card kpi-green h-100">
-            <div class="kpi-icon icon-green"><i class="fas fa-wallet"></i></div>
-            <div class="kpi-number" style="font-size:1.3rem;">@totalMargin.ToIndianCurrency()</div>
-            <div class="kpi-label">Total Margin Pool</div>
-            <div class="kpi-sub">Across all accounts</div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="kpi-card kpi-amber h-100">
-            <div class="kpi-icon icon-amber"><i class="fas fa-user-tie"></i></div>
-            <div class="kpi-number" style="font-size:1.3rem;">@avgMargin.ToIndianCurrency()</div>
-            <div class="kpi-label">Avg Margin / Client</div>
-            <div class="kpi-sub">Portfolio average</div>
-        </div>
-    </div>
-    <div class="col-lg-3 col-md-6 col-sm-6">
-        <div class="kpi-card kpi-red h-100">
-            <div class="kpi-icon icon-red"><i class="fas fa-sitemap"></i></div>
-            <div class="kpi-number" data-target="@subBrokers" data-format="number">0</div>
+    <!-- Sub-Brokers -->
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-card-icon" style="background:#f0fdf4; color:#16a34a;"><i class="fas fa-building"></i></div>
             <div class="kpi-label">Sub-Brokers</div>
-            <div class="kpi-sub">Active networks</div>
+            <div class="kpi-value" data-target="@subBrokers">0</div>
+            <div class="kpi-sub"><span style="color:#94a3b8; font-weight:600;">●</span> Active entities</div>
+        </div>
+    </div>
+    <!-- High Risk -->
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-card-icon" style="background:#fef2f2; color:#dc2626;"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="kpi-label">High Risk</div>
+            <div class="kpi-value" data-target="@highRiskCount" style="color:#dc2626;">0</div>
+            <div class="kpi-sub"><span style="color:#f59e0b; font-weight:700;">●</span> @midRiskCount on watchlist</div>
+        </div>
+    </div>
+    <!-- Total Exposure -->
+    <div class="col-6 col-md-3">
+        <div class="kpi-card">
+            <div class="kpi-card-icon" style="background:#fffbeb; color:#d97706;"><i class="fas fa-rupee-sign"></i></div>
+            <div class="kpi-label">Total Exposure</div>
+            <div class="kpi-value kpi-currency" data-target="@((long)totalExposure)" style="font-size:1.5rem; color:#d97706;">₹0</div>
+            <div class="kpi-sub"><span style="color:#94a3b8; font-weight:600;">●</span> Avg margin ₹@avgMargin.ToString("N0")</div>
         </div>
     </div>
 </div>
 
-<!-- ── Charts ── -->
-<div class="row g-3 mb-3">
-    <div class="col-lg-7">
-        <div class="chart-panel">
-            <div class="chart-title">
-                <span class="chart-icon" style="background:rgba(129,140,248,0.15); color:#818cf8;"><i class="fas fa-chart-bar"></i></span>
-                Exposure by Sub-Broker
+<!-- ══════════════ CHARTS ROW ══════════════ -->
+<div class="row g-3 mb-4">
+    <div class="col-md-7">
+        <div class="chart-card">
+            <div class="chart-card-title"><i class="fas fa-chart-bar" style="color:#2563eb;"></i> Trade Distribution</div>
+            <canvas id="tradeChart" style="height:230px !important;"></canvas>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="chart-card">
+            <div class="chart-card-title"><i class="fas fa-chart-pie" style="color:#7c3aed;"></i> Risk Breakdown</div>
+            <canvas id="riskChart" style="height:230px !important;"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════ CLIENTS PANEL ══════════════ -->
+<div class="tn-panel">
+    <!-- Panel header with search + filters -->
+    <div class="tn-panel-header">
+        <div class="tn-panel-title">
+            <i class="fas fa-id-card" style="color:#2563eb;"></i>
+            Client Portfolio
+            <span style="font-size:0.65rem; font-weight:600; background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:10px; margin-left:4px;">
+                @totalClients CLIENTS
+            </span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <!-- Search -->
+            <div class="tn-search-wrap">
+                <i class="fas fa-search tn-search-icon"></i>
+                <input type="text" id="clientSearch" class="tn-search" placeholder="Search client, city, PAN…" oninput="applyFilters()">
             </div>
-            <div style="height:calc(100% - 40px); position:relative;"><canvas id="exposureChart"></canvas></div>
-        </div>
-    </div>
-    <div class="col-lg-5">
-        <div class="chart-panel">
-            <div class="chart-title">
-                <span class="chart-icon" style="background:rgba(34,197,94,0.15); color:#22c55e;"><i class="fas fa-chart-pie"></i></span>
-                Risk Distribution
+            <!-- Filter tabs -->
+            <div class="tn-tabs">
+                <button class="tn-tab tab-active-all" onclick="setFilter('all',this)">All</button>
+                <button class="tn-tab" onclick="setFilter('high',this)"><i class="fas fa-circle" style="color:#ef4444;font-size:0.5rem;"></i> High Risk</button>
+                <button class="tn-tab" onclick="setFilter('mid',this)"><i class="fas fa-circle" style="color:#f59e0b;font-size:0.5rem;"></i> Watchlist</button>
+                <button class="tn-tab" onclick="setFilter('safe',this)"><i class="fas fa-circle" style="color:#22c55e;font-size:0.5rem;"></i> Safe</button>
             </div>
-            <div style="height:calc(100% - 40px); position:relative;"><canvas id="riskDistChart"></canvas></div>
-        </div>
-    </div>
-</div>
-
-<!-- ── Section Header ── -->
-<div class="section-bar">
-    <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
-        <span class="section-title"><i class="fas fa-id-card" style="color:#818cf8; margin-right:6px;"></i>Client Portfolio</span>
-        <!-- Risk Filter Tabs -->
-        <div class="filter-tabs">
-            <button class="filter-tab active-all" onclick="filterCards('all',this)">
-                All <span style="margin-left:4px; font-size:0.6rem; opacity:0.7;">(@totalClients)</span>
-            </button>
-            <button class="filter-tab" onclick="filterCards('high',this)">
-                <i class="fas fa-fire" style="font-size:0.55rem;"></i> High Risk <span style="margin-left:4px; font-size:0.6rem; opacity:0.7;">(@highRiskCount)</span>
-            </button>
-            <button class="filter-tab" onclick="filterCards('mid',this)">
-                <i class="fas fa-eye" style="font-size:0.55rem;"></i> Watchlist
-            </button>
-            <button class="filter-tab" onclick="filterCards('safe',this)">
-                <i class="fas fa-shield-alt" style="font-size:0.55rem;"></i> Safe
+            <!-- Export -->
+            <button class="cr-btn btn-trades" onclick="exportCSV()" style="padding:6px 14px;">
+                <i class="fas fa-download"></i> Export
             </button>
         </div>
     </div>
-    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-        <div style="position:relative;">
-            <i class="fas fa-search" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#475569; font-size:0.7rem; pointer-events:none;"></i>
-            <input type="text" id="clientSearch" class="tn-search form-control" placeholder="Search clients, city..." style="width:200px;">
-        </div>
-        <button onclick="exportCSV()" title="Export visible clients as CSV" style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); color:#22c55e; border-radius:9px; padding:7px 14px; font-size:0.7rem; font-weight:700; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.background='rgba(34,197,94,0.2)'" onmouseout="this.style.background='rgba(34,197,94,0.1)'">
-            <i class="fas fa-file-csv"></i> Export
-        </button>
-    </div>
-</div>
 
-<!-- ── Client Cards Grid ── -->
-@if (Model == null || !Model.Any())
-{
-    <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:14px; padding:32px; text-align:center; color:#f59e0b;">
-        <i class="fas fa-database" style="font-size:2.5rem; margin-bottom:12px; display:block; opacity:0.6;"></i>
-        <p style="font-weight:700; margin:0; font-size:0.9rem;">No data found.</p>
-        <p style="margin:6px 0 0; font-size:0.75rem; color:#78716c;">Run <code>dotnet run</code> with SQLite dev config to auto-seed sample data.</p>
+    <!-- Table header row -->
+    <div class="client-row-header">
+        <div class="col-hd">Client</div>
+        <div class="col-hd">Risk</div>
+        <div class="col-hd">Exposure</div>
+        <div class="col-hd">Margin Util.</div>
+        <div class="col-hd">Sub-Broker</div>
+        <div class="col-hd">Actions</div>
     </div>
-}
-else
-{
-    var sortedClients = clients.OrderByDescending(c => c.MarginAvailable > 0 ? (decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100 : 100m).ToList();
 
-    <div class="row g-3" id="clientCardsContainer">
-        @foreach (var item in sortedClients)
+    <!-- Client rows -->
+    <div id="clientRows">
+        @foreach (var client in clients)
         {
-            var ep = item.MarginAvailable > 0 ? ((decimal)(item.Quantity * item.Price) / item.MarginAvailable * 100) : 100m;
-            if (ep > 100) ep = 100;
-
-            var riskLabel  = ep > 80 ? "high"    : ep > 50 ? "mid"    : "safe";
-            var riskText   = ep > 80 ? "HIGH RISK" : ep > 50 ? "WATCHLIST" : "SAFE";
-            var riskIcon   = ep > 80 ? "fa-fire"  : ep > 50 ? "fa-eye" : "fa-shield-alt";
-            var riskColor  = ep > 80 ? "#ef4444"  : ep > 50 ? "#f59e0b" : "#22c55e";
-            var riskBg     = ep > 80 ? "rgba(239,68,68,0.12)"  : ep > 50 ? "rgba(245,158,11,0.12)"  : "rgba(34,197,94,0.12)";
-            var riskBorder = ep > 80 ? "rgba(239,68,68,0.3)"   : ep > 50 ? "rgba(245,158,11,0.3)"   : "rgba(34,197,94,0.3)";
-            var marginCol  = item.MarginAvailable >= 500000 ? "#34d399" : item.MarginAvailable >= 200000 ? "#f59e0b" : "#f87171";
-
-            <div class="col-xl-4 col-lg-6 col-md-6 client-card mb-1" data-risk="@riskLabel" data-client="@item.ClientName @item.ClientCode @item.City @item.State @item.SubBrokerName">
-                <div class="client-card-body h-100" style="border-top-color:@riskColor;">
-                    <!-- Top row -->
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <div class="client-name">@item.ClientName</div>
-                            <div class="client-sub">@item.ClientCode &nbsp;·&nbsp; @item.PAN</div>
-                        </div>
-                        <span class="risk-badge" style="background:@riskBg; color:@riskColor; border:1px solid @riskBorder;">
-                            <i class="fas @riskIcon" style="font-size:0.5rem;"></i> @riskText
-                        </span>
+            var exposure  = (decimal)(client.Quantity * client.Price);
+            var utilPct   = client.MarginAvailable > 0 ? Math.Min((double)(exposure / client.MarginAvailable * 100), 100) : 0;
+            var riskLevel = utilPct > 80 ? "high" : (utilPct > 50 ? "mid" : "safe");
+            var riskLabel = utilPct > 80 ? "High Risk" : (utilPct > 50 ? "Watchlist" : "Safe");
+            var riskIcon  = utilPct > 80 ? "fa-exclamation-triangle" : (utilPct > 50 ? "fa-eye" : "fa-check-circle");
+            var utilColor = utilPct > 80 ? "#ef4444" : (utilPct > 50 ? "#f59e0b" : "#22c55e");
+            var pillClass = riskLevel == "high" ? "pill-high" : (riskLevel == "mid" ? "pill-mid" : "pill-safe");
+            <div class="client-row"
+                 data-risk="@riskLevel"
+                 data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PanCard?.ToLower() ?? "")">
+                <!-- Name col -->
+                <div>
+                    <div class="cr-name">@(client.ClientName ?? "Unknown")</div>
+                    <div class="cr-sub">
+                        @if (!string.IsNullOrEmpty(client.City)) { <span>@client.City</span> }
+                        @if (!string.IsNullOrEmpty(client.State)) { <span>&nbsp;/ @client.State</span> }
+                        @if (!string.IsNullOrEmpty(client.PanCard)) { <span>&nbsp;· @client.PanCard</span> }
                     </div>
-
-                    <!-- Meta chips -->
-                    <div class="client-meta">
-                        <span class="meta-chip"><i class="fas fa-map-marker-alt" style="color:#818cf8;"></i>@item.City, @item.State</span>
-                        <span class="meta-chip"><i class="fas fa-user-tie" style="color:#34d399;"></i>@item.SubBrokerCode</span>
-                    </div>
-
-                    <!-- Margin box -->
-                    <div class="margin-box">
-                        <div class="margin-num" style="color:@marginCol;">@item.MarginAvailable.ToIndianCurrency()</div>
-                        <div class="margin-lbl">Available Margin</div>
-                    </div>
-
-                    <!-- Utilization bar -->
-                    <div style="margin-bottom:10px;">
-                        <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-                            <span style="font-size:0.6rem; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Margin Utilization</span>
-                            <span style="font-size:0.7rem; font-weight:800; color:@riskColor;">@Math.Round(ep,1)%</span>
-                        </div>
+                </div>
+                <!-- Risk pill -->
+                <div>
+                    <span class="risk-pill @pillClass">
+                        <i class="fas @riskIcon" style="font-size:0.5rem;"></i>
+                        @riskLabel
+                    </span>
+                </div>
+                <!-- Exposure -->
+                <div>
+                    <div class="cr-val">₹@exposure.ToString("N0")</div>
+                    <div class="cr-meta">Qty @client.Quantity</div>
+                </div>
+                <!-- Utilization bar -->
+                <div>
+                    <div class="util-inline">
                         <div class="util-track">
-                            <div class="util-fill" style="width:0%; background:@riskColor;" data-width="@ep"></div>
+                            <div class="util-fill" style="width:0%; background:@utilColor;" data-pct="@utilPct.ToString("0")"></div>
                         </div>
+                        <div class="util-pct" style="color:@utilColor;">@utilPct.ToString("0")%</div>
                     </div>
-
-                    <!-- Buttons -->
-                    <div class="d-flex gap-2">
-                        <button class="card-btn btn-view" onclick="viewTrades(@item.ClientId, '@item.ClientName', '@item.ClientCode')">
-                            <i class="fas fa-table-list" style="font-size:0.65rem;"></i> View Trades
-                        </button>
-                        <button class="card-btn btn-risk" onclick="analyzeRisk(@item.ClientId, '@item.ClientName')">
-                            <i class="fas fa-brain" style="font-size:0.65rem;"></i> Risk AI
-                        </button>
-                    </div>
+                    <div class="cr-meta" style="margin-top:3px;">₹@client.MarginAvailable.ToString("N0") margin</div>
+                </div>
+                <!-- Sub-broker -->
+                <div>
+                    <div class="cr-val" style="font-size:0.78rem; color:#374151;">@(client.SubBrokerId ?? "—")</div>
+                    @if (!string.IsNullOrEmpty(client.SubBrokerCode)) {
+                        <div class="cr-meta">@client.SubBrokerCode</div>
+                    }
+                </div>
+                <!-- Actions -->
+                <div style="display:flex; gap:6px;">
+                    <button class="cr-btn btn-trades"
+                            onclick="loadClientTrades('@client.ClientId', '@Html.Raw(client.ClientName?.Replace("'","\'"))')"
+                            title="View Trades">
+                        <i class="fas fa-list-alt"></i> Trades
+                    </button>
+                    <button class="cr-btn btn-riskx"
+                            onclick="loadRiskData('@client.ClientId', '@Html.Raw(client.ClientName?.Replace("'","\'"))')"
+                            title="Risk Analysis">
+                        <i class="fas fa-robot"></i>
+                    </button>
                 </div>
             </div>
         }
     </div>
 
-    <!-- Empty state when filter hides all -->
-    <div id="noResults" style="display:none; text-align:center; padding:40px; color:#64748b;">
-        <i class="fas fa-filter" style="font-size:2rem; margin-bottom:10px; opacity:0.3; display:block;"></i>
-        No clients match this filter.
+    <!-- No results -->
+    <div id="noResults" style="display:none; text-align:center; padding:40px; color:#94a3b8;">
+        <i class="fas fa-search" style="font-size:1.5rem; margin-bottom:10px; display:block;"></i>
+        No clients match your filters
     </div>
-}
+</div>
 
-<!-- ── Trade Modal ── -->
+<!-- ══════════════ MODALS ══════════════ -->
+<!-- Trades Modal -->
 <div class="modal fade" id="tradesModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header trade-modal-header">
-                <h5 class="modal-title"><i class="fas fa-chart-line" style="color:#818cf8;margin-right:8px;"></i>Trade History — <span id="modalClientName" style="color:#818cf8;"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header trade-mh">
+                <h5 class="modal-title"><i class="fas fa-list-alt" style="color:#2563eb; margin-right:8px;"></i><span id="tradesModalTitle">Client Trades</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="tradesContent" style="padding:20px; background:rgba(10,18,35,0.98);">
-                <div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-3" style="color:#64748b; font-size:0.8rem;">Loading trades...</p></div>
+            <div class="modal-body" id="tradesModalContent" style="padding:20px; min-height:200px; background:white;">
+                <div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div></div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- ── Risk Modal ── -->
+<!-- Risk Modal -->
 <div class="modal fade" id="riskModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
-            <div class="modal-header risk-modal-header">
-                <h5 class="modal-title"><i class="fas fa-shield-alt" style="color:#f87171;margin-right:8px;"></i>Risk Analysis — <span id="riskClientName" style="color:#f87171;"></span></h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            <div class="modal-header risk-mh">
+                <h5 class="modal-title"><i class="fas fa-robot" style="color:#dc2626; margin-right:8px;"></i><span id="riskModalTitle">Risk Analysis</span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="riskContent" style="padding:20px; background:rgba(10,18,35,0.98);">
-                <div class="text-center py-5"><div class="spinner-border text-warning"></div><p class="mt-3" style="color:#64748b; font-size:0.8rem;">Running risk engine...</p></div>
+            <div class="modal-body" id="riskModalContent" style="padding:20px; min-height:200px; background:white;">
+                <div class="text-center p-4"><div class="spinner-border text-danger" role="status"></div></div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- ══════════════ SCRIPTS ══════════════ -->
 @section Scripts {
 <script>
-// ── Chart Data ──
-var subBrokerExposure = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-    (Model ?? new List<TradeNexus.Web.Models.Trade>())
-        .GroupBy(t => t.SubBrokerCode)
-        .Select(g => new { label = g.Key ?? "Unknown", value = (double)g.Sum(t => t.Quantity * t.Price) })
-        .OrderByDescending(x => x.value).Take(8).ToList()
-));
-var riskCounts = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
-    (Model ?? new List<TradeNexus.Web.Models.Trade>())
-        .GroupBy(t => {
-            var ep2 = t.MarginAvailable > 0 ? ((double)(t.Quantity * t.Price) / (double)t.MarginAvailable * 100) : 100;
-            return ep2 > 80 ? "High Risk" : ep2 > 50 ? "Watchlist" : "Safe";
-        })
-        .Select(g => new { label = g.Key, count = g.Count() }).ToList()
+// ── Data from server ──
+var chartData = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(
+    clients.Select(c => new {
+        name    = c.ClientName ?? "Unknown",
+        exposure= (double)(c.Quantity * c.Price),
+        margin  = (double)c.MarginAvailable,
+        risk    = c.MarginAvailable > 0 && (decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100 > 80 ? "high"
+                : c.MarginAvailable > 0 && (decimal)(c.Quantity * c.Price) / c.MarginAvailable * 100 > 50 ? "mid" : "safe"
+    })
 ));
 
-$(document).ready(function () {
+var highCount  = @highRiskCount;
+var midCount   = @midRiskCount;
+var safeCount  = @safeCount;
 
-    // ── Live Clock ──
-    function tick() {
-        var n=new Date(), h=String(n.getHours()).padStart(2,'0'), m=String(n.getMinutes()).padStart(2,'0'), s=String(n.getSeconds()).padStart(2,'0');
-        document.getElementById('liveClock').textContent = h+':'+m+':'+s;
-    }
-    setInterval(tick, 1000); tick();
+// ── Count-up animation ──
+document.querySelectorAll('.kpi-value[data-target]').forEach(function(el) {
+    var target = parseInt(el.getAttribute('data-target')) || 0;
+    var isCurr = el.classList.contains('kpi-currency');
+    var start  = 0, steps = 60, cur = 0;
+    var step   = target / steps;
+    var timer  = setInterval(function() {
+        cur = Math.min(cur + step, target);
+        el.textContent = isCurr ? '₹' + Math.floor(cur).toLocaleString('en-IN') : Math.floor(cur);
+        if (cur >= target) clearInterval(timer);
+    }, 16);
+});
 
-    // ── Animated Count-Up for numeric KPIs ──
-    document.querySelectorAll('[data-target]').forEach(function(el) {
-        var target = parseInt(el.dataset.target);
-        var start = 0, dur = 1200, step = 16;
-        var inc = target / (dur / step);
-        var timer = setInterval(function() {
-            start = Math.min(start + inc, target);
-            el.textContent = Math.floor(start);
-            if (start >= target) clearInterval(timer);
-        }, step);
+// ── Animate utilization bars ──
+setTimeout(function() {
+    document.querySelectorAll('.util-fill').forEach(function(bar) {
+        var pct = bar.getAttribute('data-pct') || '0';
+        bar.style.width = pct + '%';
+    });
+}, 200);
+
+// ── Charts ──
+(function() {
+    var topClients = chartData.slice(0,8);
+    var labels = topClients.map(function(c){ return c.name.split(' ')[0]; });
+    var exposures = topClients.map(function(c){ return Math.round(c.exposure); });
+    var barColors = topClients.map(function(c){
+        return c.risk === 'high' ? 'rgba(239,68,68,0.75)' : c.risk === 'mid' ? 'rgba(245,158,11,0.75)' : 'rgba(37,99,235,0.75)';
     });
 
-    // ── Animate utilization bars ──
-    setTimeout(function() {
-        document.querySelectorAll('.util-fill').forEach(function(bar) {
-            bar.style.width = bar.dataset.width + '%';
-        });
-    }, 300);
-
-    // ── Chart: Exposure Bar ──
-    var ctxExp = document.getElementById('exposureChart');
-    if (ctxExp && subBrokerExposure.length > 0) {
-        new Chart(ctxExp, {
+    // Trade / exposure bar chart
+    var ctx1 = document.getElementById('tradeChart');
+    if (ctx1) {
+        new Chart(ctx1, {
             type: 'bar',
             data: {
-                labels: subBrokerExposure.map(d => d.label),
+                labels: labels,
                 datasets: [{
                     label: 'Exposure (₹)',
-                    data: subBrokerExposure.map(d => d.value),
-                    backgroundColor: ['rgba(102,126,234,0.7)','rgba(34,197,94,0.7)','rgba(239,68,68,0.7)','rgba(245,158,11,0.7)','rgba(79,172,254,0.7)','rgba(240,147,251,0.7)','rgba(56,239,125,0.7)','rgba(244,92,67,0.7)'],
-                    borderColor: ['#818cf8','#22c55e','#ef4444','#f59e0b','#4facfe','#f093fb','#38ef7d','#f45c43'],
-                    borderWidth: 2, borderRadius: 8
+                    data: exposures,
+                    backgroundColor: barColors,
+                    borderRadius: 6, borderSkipped: false
                 }]
             },
             options: {
@@ -440,131 +283,138 @@ $(document).ready(function () {
                 animation: { duration: 1000, easing: 'easeInOutQuart' },
                 plugins: {
                     legend: { display: false },
-                    tooltip: { callbacks: { label: ctx => '₹ ' + ctx.parsed.y.toLocaleString('en-IN') }, backgroundColor:'rgba(10,18,35,0.95)', titleColor:'#e2e8f0', bodyColor:'#94a3b8', borderColor:'rgba(148,163,184,0.2)', borderWidth:1 }
+                    tooltip: {
+                        callbacks: {
+                            label: function(c) { return '₹' + c.raw.toLocaleString('en-IN'); }
+                        }
+                    }
                 },
                 scales: {
-                    x: { ticks: { color:'#64748b', font:{size:10} }, grid: { color:'rgba(148,163,184,0.06)' }, border:{color:'rgba(148,163,184,0.08)'} },
-                    y: { ticks: { color:'#64748b', font:{size:10}, callback: v => '₹'+(v/100000).toFixed(0)+'L' }, grid: { color:'rgba(148,163,184,0.06)' }, border:{color:'rgba(148,163,184,0.08)'} }
+                    y: {
+                        grid: { color: '#f1f5f9' },
+                        ticks: {
+                            color: '#94a3b8', font: { size: 10 },
+                            callback: function(v) { return '₹' + (v/1000 > 0 ? v/1000 + 'K' : v); }
+                        }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { color: '#374151', font: { size: 10 } }
+                    }
                 }
             }
         });
     }
 
-    // ── Chart: Risk Doughnut ──
-    var ctxRisk = document.getElementById('riskDistChart');
-    if (ctxRisk && riskCounts.length > 0) {
-        var cmap = { 'Safe':'#22c55e', 'Watchlist':'#f59e0b', 'High Risk':'#ef4444' };
-        new Chart(ctxRisk, {
+    // Risk donut
+    var ctx2 = document.getElementById('riskChart');
+    if (ctx2) {
+        new Chart(ctx2, {
             type: 'doughnut',
             data: {
-                labels: riskCounts.map(d => d.label),
-                datasets: [{ data: riskCounts.map(d => d.count), backgroundColor: riskCounts.map(d => (cmap[d.label]||'#94a3b8')+'aa'), borderColor: riskCounts.map(d => cmap[d.label]||'#94a3b8'), borderWidth: 3, hoverOffset: 10 }]
+                labels: ['High Risk', 'Watchlist', 'Safe'],
+                datasets: [{
+                    data: [highCount, midCount, safeCount],
+                    backgroundColor: ['#ef4444','#f59e0b','#22c55e'],
+                    borderWidth: 3, borderColor: '#fff',
+                    hoverBorderColor: '#fff'
+                }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false, cutout: '68%',
-                animation: { duration: 1000, easing: 'easeInOutQuart' },
+                responsive: true, maintainAspectRatio: false,
+                animation: { animateRotate: true, duration: 1000 },
+                cutout: '60%',
                 plugins: {
-                    legend: { position:'bottom', labels:{ color:'#94a3b8', font:{weight:'600',size:11}, padding:18, usePointStyle:true, pointStyleWidth:8 } },
-                    tooltip: { backgroundColor:'rgba(10,18,35,0.95)', titleColor:'#e2e8f0', bodyColor:'#94a3b8', borderColor:'rgba(148,163,184,0.2)', borderWidth:1 }
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#374151', font: { size: 11 }, padding: 16 }
+                    }
                 }
             }
         });
     }
+})();
 
-    // ── Search ──
-    $('#clientSearch').on('input', function () {
-        applyFilters();
-    });
-
-});
-
-// ── Filter Tabs ──
+// ── Filter logic ──
 var activeFilter = 'all';
-function filterCards(risk, btn) {
-    activeFilter = risk;
-    // Reset all tab styles
-    document.querySelectorAll('.filter-tab').forEach(function(t) {
-        t.className = 'filter-tab';
+function setFilter(f, btn) {
+    activeFilter = f;
+    document.querySelectorAll('.tn-tab').forEach(function(b) {
+        b.className = 'tn-tab';
     });
-    btn.className = 'filter-tab active-' + risk;
+    if (f === 'all')  btn.classList.add('tab-active-all');
+    if (f === 'high') btn.classList.add('tab-active-high');
+    if (f === 'mid')  btn.classList.add('tab-active-mid');
+    if (f === 'safe') btn.classList.add('tab-active-safe');
     applyFilters();
 }
-
 function applyFilters() {
-    var term = $('#clientSearch').val().toLowerCase();
+    var term = document.getElementById('clientSearch').value.toLowerCase();
+    var rows = document.querySelectorAll('#clientRows .client-row');
     var visible = 0;
-    $('.client-card').each(function () {
-        var card = $(this);
-        var matchRisk = (activeFilter === 'all') || (card.data('risk') === activeFilter);
-        var matchSearch = !term || card.data('client').toLowerCase().includes(term);
-        if (matchRisk && matchSearch) { card.show(); visible++; } else { card.hide(); }
+    rows.forEach(function(row) {
+        var matchR = (activeFilter === 'all') || (row.dataset.risk === activeFilter);
+        var matchS = !term || row.dataset.client.includes(term);
+        var show   = matchR && matchS;
+        row.style.display = show ? '' : 'none';
+        if (show) visible++;
     });
-    $('#noResults').toggle(visible === 0);
+    document.getElementById('noResults').style.display = (visible === 0) ? '' : 'none';
 }
 
-// ── Modal: View Trades ──
-function viewTrades(clientId, clientName, clientCode) {
-    $('#modalClientName').text(clientName + ' (' + clientCode + ')');
-    $('#tradesModal').modal('show');
-    $('#tradesContent').html('<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-3" style="color:#64748b;font-size:0.8rem;">Loading trades...</p></div>');
-    $.get('/Trade/ClientTrades?clientId=' + clientId, function (data) {
-        $('#tradesContent').html(data);
-        setTimeout(function () { if (typeof window._initClientCharts === 'function') window._initClientCharts(); }, 120);
-        showToast('success', '✓ Trade history loaded for ' + clientName);
-    }).fail(function () {
-        $('#tradesContent').html('<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Failed to load trade data. Check DB connection.</div>');
-        showToast('error', '✗ Failed to load trade data');
-    });
+// ── Trades modal ──
+function loadClientTrades(clientId, clientName) {
+    document.getElementById('tradesModalTitle').textContent = clientName + ' – Trades';
+    document.getElementById('tradesModalContent').innerHTML =
+        '<div class="text-center p-4"><div class="spinner-border text-primary" role="status"></div></div>';
+    new bootstrap.Modal(document.getElementById('tradesModal')).show();
+    fetch('/Trade/GetClientTrades?clientId=' + encodeURIComponent(clientId))
+        .then(function(r){ return r.text(); })
+        .then(function(html) {
+            document.getElementById('tradesModalContent').innerHTML = html;
+            showToast('Trade data loaded', '#2563eb');
+        })
+        .catch(function() {
+            document.getElementById('tradesModalContent').innerHTML =
+                '<div class="text-center p-4" style="color:#dc2626;"><i class="fas fa-times-circle fa-2x"></i><p class="mt-2">Failed to load trades</p></div>';
+            showToast('Failed to load trades', '#ef4444');
+        });
 }
 
-// ── Modal: Risk Analysis ──
-function analyzeRisk(clientId, clientName) {
-    $('#riskClientName').text(clientName);
-    $('#riskModal').modal('show');
-    $('#riskContent').html('<div class="text-center py-5"><div class="spinner-border text-warning"></div><p class="mt-3" style="color:#64748b;font-size:0.8rem;">Running Python risk engine...</p></div>');
-    $.get('/Trade/CalculateRisk?clientId=' + clientId, function (data) {
-        $('#riskContent').html(data);
-        showToast('info', '⚡ Risk analysis complete for ' + clientName);
-    }).fail(function () {
-        $('#riskContent').html('<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> Risk analysis failed.</div>');
-        showToast('error', '✗ Risk analysis failed');
-    });
+// ── Risk modal ──
+function loadRiskData(clientId, clientName) {
+    document.getElementById('riskModalTitle').textContent = clientName + ' – Risk Analysis';
+    document.getElementById('riskModalContent').innerHTML =
+        '<div class="text-center p-4"><div class="spinner-border text-danger" role="status"></div></div>';
+    new bootstrap.Modal(document.getElementById('riskModal')).show();
+    fetch('/Trade/GetRiskAnalysis?clientId=' + encodeURIComponent(clientId))
+        .then(function(r){ return r.text(); })
+        .then(function(html) {
+            document.getElementById('riskModalContent').innerHTML = html;
+            showToast('Risk analysis loaded', '#22c55e');
+        })
+        .catch(function() {
+            document.getElementById('riskModalContent').innerHTML =
+                '<div class="text-center p-4" style="color:#dc2626;"><i class="fas fa-times-circle fa-2x"></i><p class="mt-2">Risk data unavailable</p></div>';
+            showToast('Risk data unavailable', '#ef4444');
+        });
 }
 
 // ── Export CSV ──
 function exportCSV() {
-    var rows = [['Name','Code','PAN','City','State','Sub-Broker','Margin','Utilization','Risk']];
-    $('.client-card:visible').each(function () {
-        var c = $(this);
-        rows.push([
-            c.find('.client-name').text().trim(),
-            c.find('.client-sub').text().trim().split('·')[0].trim(),
-            c.find('.client-sub').text().trim().split('·')[1]?.trim() || '',
-            '', '', '',
-            c.find('.margin-num').text().trim(),
-            c.find('[style*="font-weight:800"]').text().trim(),
-            c.data('risk')
-        ]);
+    var rows = document.querySelectorAll('#clientRows .client-row:not([style*="display: none"])');
+    var csv  = 'Client,Risk,Sub-Broker\n';
+    rows.forEach(function(r) {
+        var name = r.querySelector('.cr-name')?.textContent?.trim() || '';
+        var risk = r.dataset.risk || '';
+        var sub  = r.querySelectorAll('.cr-val')[1]?.textContent?.trim() || '';
+        csv += [name, risk, sub].join(',') + '\n';
     });
-    var csv = rows.map(r => r.map(x => '"'+(x||'')+'"').join(',')).join('\n');
     var a = document.createElement('a');
-    a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
-    a.download = 'TradeNexus_' + new Date().toISOString().slice(0,10) + '.csv';
+    a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+    a.download = 'tradenexus_clients.csv';
     a.click();
-    showToast('success', '✓ CSV exported successfully');
+    showToast('Export complete ✓', '#22c55e');
 }
-
-// ── Toast ──
-function showToast(type, msg) {
-    var t = document.getElementById('tnToast');
-    var colors = { success:'#22c55e', error:'#ef4444', info:'#818cf8' };
-    t.style.borderColor = colors[type] || '#64748b';
-    document.getElementById('tnToastMsg').textContent = msg;
-    t.classList.add('show');
-    setTimeout(function() { t.classList.remove('show'); }, 3500);
-}
-
-// Auto-refresh every 5 min
-setTimeout(function() { location.reload(); }, 300000);
 </script>
 }
