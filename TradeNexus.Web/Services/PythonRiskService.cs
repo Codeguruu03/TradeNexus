@@ -1,29 +1,51 @@
 using System.Diagnostics;
 using System.IO;
+using System.Collections.Generic;
+using System.Text;
 
 namespace TradeNexus.Web.Services
 {
     public class PythonRiskService
     {
-        private static string _pythonCommand = null;
-
         public string ExecuteRiskEngine(string jsonInput)
         {
-            if (_pythonCommand == null)
-            {
-                _pythonCommand = DiscoverPythonCommand();
-            }
-
             var scriptPath = Path.Combine(
                 Directory.GetCurrentDirectory(),
                 "PythonEngine",
                 "risk_engine.py"
             );
 
+            var attempts = BuildPythonAttempts();
+            var errors = new StringBuilder();
+
+            foreach (var attempt in attempts)
+            {
+                var outcome = RunPython(attempt.fileName, attempt.argsPrefix, scriptPath, jsonInput);
+                if (outcome.success)
+                {
+                    return outcome.output;
+                }
+
+                if (!string.IsNullOrWhiteSpace(outcome.error))
+                {
+                    errors.Append($"[{attempt.fileName} {attempt.argsPrefix}] ");
+                    errors.AppendLine(outcome.error.Trim());
+                }
+            }
+
+            return "Python Error: Could not execute risk engine. " + errors.ToString().Trim();
+        }
+
+        private (bool success, string output, string error) RunPython(string fileName, string argsPrefix, string scriptPath, string jsonInput)
+        {
+            var args = string.IsNullOrWhiteSpace(argsPrefix)
+                ? $"\"{scriptPath}\""
+                : $"{argsPrefix} \"{scriptPath}\"";
+
             ProcessStartInfo start = new ProcessStartInfo
             {
-                FileName = _pythonCommand,
-                Arguments = $"\"{scriptPath}\"",
+                FileName = fileName,
+                Arguments = args,
                 UseShellExecute = false,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true,
@@ -33,7 +55,7 @@ namespace TradeNexus.Web.Services
 
             using (Process process = Process.Start(start))
             {
-                if (process == null) return "Error: Could not start Python process.";
+                if (process == null) return (false, null, "Could not start Python process.");
 
                 // Write JSON to stdin to avoid shell escaping issues
                 using (StreamWriter sw = process.StandardInput)
@@ -46,31 +68,51 @@ namespace TradeNexus.Web.Services
 
                 string result = process.StandardOutput.ReadToEnd();
                 string error = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+
+                if (process.ExitCode != 0)
+                    return (false, null, string.IsNullOrWhiteSpace(error) ? $"Python process exited with code {process.ExitCode}." : error);
 
                 if (!string.IsNullOrEmpty(error) && !error.Contains("DeprecationWarning"))
-                    return "Python Error: " + error;
+                    return (false, null, error);
 
-                return result;
+                return (true, result, null);
             }
         }
 
-        private string DiscoverPythonCommand()
+        private IEnumerable<(string fileName, string argsPrefix)> BuildPythonAttempts()
         {
-            if (CanRunCommand("python")) return "python";
-            if (CanRunCommand("py")) return "py";
-            return "python"; // Default
+            var cwd = Directory.GetCurrentDirectory();
+            var venvPython = Path.Combine(cwd, ".venv", "Scripts", "python.exe");
+
+            if (File.Exists(venvPython))
+                yield return (venvPython, string.Empty);
+
+            // Windows launcher (preferred over python app alias)
+            if (CanRunCommand("py", "--version"))
+            {
+                yield return ("py", "-3");
+                yield return ("py", string.Empty);
+            }
+
+            if (CanRunCommand("python", "--version"))
+                yield return ("python", string.Empty);
+
+            // Last fallback, still attempt python even if version check fails
+            yield return ("python", string.Empty);
         }
 
-        private bool CanRunCommand(string cmd)
+        private bool CanRunCommand(string cmd, string arguments)
         {
             try
             {
                 ProcessStartInfo psi = new ProcessStartInfo
                 {
                     FileName = cmd,
-                    Arguments = "--version",
+                    Arguments = arguments,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
+                    RedirectStandardError = true,
                     CreateNoWindow = true
                 };
                 using (Process p = Process.Start(psi))
