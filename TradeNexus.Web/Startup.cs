@@ -39,6 +39,10 @@ namespace TradeNexus.Web
 
             // Register PythonRiskService for DI
             services.AddScoped<PythonRiskService>();
+
+            // Register Market Data Service (Live Prices via AlphaVantage)
+            services.AddMemoryCache();
+            services.AddHttpClient<MarketDataService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

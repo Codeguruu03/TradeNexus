@@ -14,11 +14,13 @@ namespace TradeNexus.Web.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly PythonRiskService _riskService;
+        private readonly MarketDataService _marketService;
 
-        public TradeController(ApplicationDbContext context, PythonRiskService riskService)
+        public TradeController(ApplicationDbContext context, PythonRiskService riskService, MarketDataService marketService)
         {
             _context = context;
             _riskService = riskService;
+            _marketService = marketService;
         }
 
         public async Task<IActionResult> Index()
@@ -98,6 +100,16 @@ namespace TradeNexus.Web.Controllers
 
             ViewBag.ListTitle = type == "high" ? "High Risk Clients" : "All Registered Clients";
             return PartialView("_ClientsListPartial", clients.ToList());
+        }
+
+        // GET /Trade/GetLivePrices
+        public async Task<IActionResult> GetLivePrices()
+        {
+            var trades = await _context.Trades.ToListAsync();
+            var symbols = trades.Select(t => t.Symbol).Distinct().ToList();
+            var prices = await _marketService.GetLivePricesAsync(symbols);
+            // Return JSON: { "RELIANCE": 2845.60, "TCS": null, ... }
+            return Json(prices);
         }
     }
 }

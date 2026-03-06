@@ -79,6 +79,10 @@
             <span style="font-size:0.65rem; font-weight:600; background:#eff6ff; color:#2563eb; padding:2px 8px; border-radius:10px; margin-left:4px;">
                 @totalClients CLIENTS
             </span>
+            <span id="liveStatusBadge" style="font-size:0.65rem; font-weight:700; background:#fef2f2; color:#dc2626; padding:2px 10px; border-radius:10px; margin-left:6px; display:inline-flex; align-items:center; gap:4px;">
+                <span style="width:7px; height:7px; background:#dc2626; border-radius:50%; display:inline-block; animation: pulse 1.5s infinite;"></span>
+                LIVE · <span id="lastUpdatedTime">--:--:--</span>
+            </span>
         </div>
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
             <!-- Search -->
@@ -105,6 +109,7 @@
         <div class="col-hd">Client</div>
         <div class="col-hd">Risk</div>
         <div class="col-hd">Exposure</div>
+        <div class="col-hd" style="color:#16a34a;"><i class="fas fa-satellite-dish" style="font-size:0.65rem;"></i> Live Price</div>
         <div class="col-hd">Margin Util.</div>
         <div class="col-hd">Sub-Broker</div>
         <div class="col-hd">Actions</div>
@@ -123,7 +128,11 @@
             var pillClass = riskLevel == "high" ? "pill-high" : (riskLevel == "mid" ? "pill-mid" : "pill-safe");
             <div class="client-row"
                  data-risk="@riskLevel"
-                 data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PAN?.ToLower() ?? "")">
+                 data-client="@(client.ClientName?.ToLower() ?? "") @(client.City?.ToLower() ?? "") @(client.State?.ToLower() ?? "") @(client.PAN?.ToLower() ?? "")"
+                 data-symbol="@client.Symbol"
+                 data-qty="@client.Quantity"
+                 data-storedprice="@client.Price"
+                 data-margin="@client.MarginAvailable">
                 <!-- Name col -->
                 <div style="cursor: pointer;" onclick="loadClientProfile('@client.ClientId')">
                     <div class="cr-name text-primary">@(client.ClientName ?? "Unknown")</div>
@@ -135,15 +144,20 @@
                 </div>
                 <!-- Risk pill -->
                 <div>
-                    <span class="risk-pill @pillClass">
+                    <span class="risk-pill @pillClass live-risk-pill">
                         <i class="fas @riskIcon" style="font-size:0.5rem;"></i>
                         @riskLabel
                     </span>
                 </div>
                 <!-- Exposure -->
                 <div>
-                    <div class="cr-val">₹@exposure.ToString("N0")</div>
+                    <div class="cr-val live-exposure">₹@exposure.ToString("N0")</div>
                     <div class="cr-meta">Qty @client.Quantity</div>
+                </div>
+                <!-- Live Price cell -->
+                <div>
+                    <div class="live-price-val" style="font-size:0.85rem; font-weight:700; color:#16a34a;">—</div>
+                    <div class="cr-meta live-price-meta">stored ₹@client.Price.ToString("N2")</div>
                 </div>
                 <!-- Utilization bar -->
                 <div>
@@ -463,5 +477,114 @@ function exportCSV() {
     a.click();
     showToast('Export complete ✓', '#22c55e');
 }
+</script>
+
+<style>
+@@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%       { opacity: 0.4; transform: scale(0.8); }
+}
+.live-price-val { transition: color 0.4s ease, transform 0.3s ease; }
+.price-up   { color: #16a34a !important; }
+.price-down { color: #dc2626 !important; }
+</style>
+
+<script>
+// ── Live Price Fetching (AlphaVantage) ──
+var _lastPrices = {};
+var _refreshInterval = 30; // seconds
+var _countdown = _refreshInterval;
+
+function fetchLivePrices() {
+    fetch('/Trade/GetLivePrices')
+        .then(function(r) { return r.json(); })
+        .then(function(prices) {
+            var now = new Date();
+            document.getElementById('lastUpdatedTime').textContent =
+                now.getHours().toString().padStart(2,'0') + ':' +
+                now.getMinutes().toString().padStart(2,'0') + ':' +
+                now.getSeconds().toString().padStart(2,'0');
+
+            document.querySelectorAll('#clientRows .client-row').forEach(function(row) {
+                var symbol   = row.dataset.symbol;
+                var qty      = parseFloat(row.dataset.qty) || 0;
+                var margin   = parseFloat(row.dataset.margin) || 1;
+                var liveVal  = row.querySelector('.live-price-val');
+                var liveMeta = row.querySelector('.live-price-meta');
+                var liveExp  = row.querySelector('.live-exposure');
+                var riskPill = row.querySelector('.live-risk-pill');
+
+                if (!liveVal) return;
+
+                var price = prices[symbol];
+
+                // Futures or unavailable — show badge
+                if (price === null || price === undefined) {
+                    liveVal.textContent  = '—';
+                    liveVal.style.color  = '#94a3b8';
+                    if (liveMeta) liveMeta.textContent = 'Futures / N/A';
+                    return;
+                }
+
+                price = parseFloat(price);
+                var prev = _lastPrices[symbol];
+
+                // Price direction arrow
+                var dir = '';
+                if (prev !== undefined) {
+                    if (price > prev)      { liveVal.className = 'live-price-val price-up';   dir = ' ▲'; }
+                    else if (price < prev) { liveVal.className = 'live-price-val price-down'; dir = ' ▼'; }
+                    else                   { liveVal.className = 'live-price-val'; }
+                }
+                _lastPrices[symbol] = price;
+
+                liveVal.textContent = '₹' + price.toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2}) + dir;
+
+                // Recalculate live exposure
+                var liveExposure = qty * price;
+                if (liveExp) liveExp.textContent = '₹' + Math.round(liveExposure).toLocaleString('en-IN');
+
+                // Recalculate risk
+                var utilPct = Math.min((liveExposure / margin) * 100, 100);
+                if (riskPill) {
+                    if (utilPct > 80) {
+                        riskPill.className = 'risk-pill pill-high live-risk-pill';
+                        riskPill.innerHTML = '<i class="fas fa-exclamation-triangle" style="font-size:0.5rem;"></i> High Risk';
+                        row.dataset.risk = 'high';
+                    } else if (utilPct > 50) {
+                        riskPill.className = 'risk-pill pill-mid live-risk-pill';
+                        riskPill.innerHTML = '<i class="fas fa-eye" style="font-size:0.5rem;"></i> Watchlist';
+                        row.dataset.risk = 'mid';
+                    } else {
+                        riskPill.className = 'risk-pill pill-safe live-risk-pill';
+                        riskPill.innerHTML = '<i class="fas fa-check-circle" style="font-size:0.5rem;"></i> Safe';
+                        row.dataset.risk = 'safe';
+                    }
+                }
+            });
+        })
+        .catch(function() {
+            document.getElementById('lastUpdatedTime').textContent = 'OFFLINE';
+            document.getElementById('liveStatusBadge').style.background = '#f1f5f9';
+            document.getElementById('liveStatusBadge').style.color = '#94a3b8';
+        });
+}
+
+// Countdown timer + auto-refresh every 30s
+function startLiveTicker() {
+    fetchLivePrices();   // immediate first call
+    setInterval(function() {
+        _countdown--;
+        if (_countdown <= 0) {
+            _countdown = _refreshInterval;
+            fetchLivePrices();
+        }
+    }, 1000);
+}
+
+// Start after page is ready
+window.addEventListener('DOMContentLoaded', function() {
+    setTimeout(startLiveTicker, 800);
+});
 </script>
 }
